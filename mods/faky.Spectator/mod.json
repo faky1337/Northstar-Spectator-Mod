@@ -1,9 +1,9 @@
 {
 	"Name" : "faky.Spectator",
 	"Description" : "Server mod that enables spectating through deathcam.",
-	"Version": "0.0.1",
+	"Version": "0.0.2",
 	"LoadPriority": 2,
-	
+
 	"Scripts": [
 		{
 			"Path": "spectator.nut",
@@ -13,7 +13,7 @@
 			}
 		}
 	],
-	
+
 	"ConVars": [
 		{
 			"Name": "spectator_chatinfo",

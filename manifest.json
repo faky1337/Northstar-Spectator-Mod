@@ -1,7 +1,7 @@
 {
     "name": "Spectator_Mod",
-    "version_number": "0.0.1",
-    "website_url": "https://www.faky.cf",
+    "version_number": "0.0.2",
+    "website_url": "https://github.com/RomeoCantCode/Northstar-Spectator-Mod",
     "description": "Server mod that enables spectating for all players through TF2 deathcam.",
     "dependencies": [
 		"northstar-Northstar-1.6.0"
