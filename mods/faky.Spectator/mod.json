@@ -1,7 +1,7 @@
 {
 	"Name" : "faky.Spectator",
 	"Description" : "Server mod that enables spectating through deathcam.",
-	"Version": "0.0.3",
+	"Version": "0.0.4",
 	"LoadPriority": 2,
 
 	"Scripts": [

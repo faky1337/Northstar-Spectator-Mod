@@ -38,7 +38,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 		{
 			if(args.len() > 0)
 			{
-				var findresult = playerfromarray.GetPlayerName().tolower().find( args[0] )
+				var findresult = playerfromarray.GetPlayerName().tolower().find( args[0].tolower() )
 				if( type( findresult ) == "null" ) //.find did not find substring
 				{
 
