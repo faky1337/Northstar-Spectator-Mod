@@ -1,8 +1,8 @@
 {
 	"Name" : "faky.Spectator",
-	"Description" : "Server mod that enables spectating through deathcam.",
-	"Version": "0.0.4",
-	"LoadPriority": 2,
+	"Description" : "Allows everyone to sp",
+	"Version": "0.1.0",
+	"LoadPriority": -1,
 
 	"Scripts": [
 		{
@@ -25,7 +25,7 @@
 		},
 		{
 			"Name": "spectator_chatinfo_message",
-			"DefaultValue": "To spectate someone type spec NICKNAME in the console. To exit spectator type endspec."
+			"DefaultValue": "To spectate someone type spec NICKNAME or spec PARTOFNAME in the console. To exit spectator type endspec."
 		},
 		{
 			"Name": "spectator_selfspec_allow",
