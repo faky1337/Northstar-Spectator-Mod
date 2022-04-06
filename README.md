@@ -10,6 +10,11 @@ To end spec: `endspec`
 ## ConVars for chat announcements
 You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them.
 
+`spectator_selfspec_allow`  
+Accepted values: `true`, `false` 
+default: `false`  
+Description: Allows spectating yourself for testing purposes.
+
 `spectator_chatinfo`  
 Accepted values: `true`, `false`  
 Default: `false`
