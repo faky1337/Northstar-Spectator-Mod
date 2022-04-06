@@ -41,19 +41,27 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 				var findresult = playerfromarray.GetPlayerName().tolower().find( args[0] )
 				if( type( findresult ) == "null" ) //.find did not find substring
 				{
-					print( "[SPECTATOR MOD] spec could not find the specified player" )
-					Chat_ServerPrivateMessage(player, "[SPECTATOR MOD] spec could not find the specified player", true)
-					return true
+
 				}
 
 				if( type( findresult ) == "int" ) //.find found substring
+				{
 					SpectatedPlayerID = playerfromarray.GetPlayerIndex()
+					if( !( GetConVarBool( "spectator_selfspec_allow" ) ) && ( player.GetPlayerIndex() == SpectatedPlayerID ) )
+					{
+						print( "[SPECTATOR MOD] Spectating yourself is disabled" )
+						Chat_ServerPrivateMessage(player, "[SPECTATOR MOD] Spectating yourself is disabled", true)
+						return true
+					}
+				}
 			}
 		}
 
 		if(SpectatedPlayerID == 128) //playerID has not changed
 		{
 			print("[SPECTATOR MOD DEBUG] Spectate playerid 128")
+			print( "[SPECTATOR MOD] spec could not find the specified player" )
+			Chat_ServerPrivateMessage(player, "[SPECTATOR MOD] spec could not find the specified player", true)
 			return true
 		}
 
