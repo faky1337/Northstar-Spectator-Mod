@@ -1,0 +1,31 @@
+{
+	"Name" : "faky.Spectator",
+	"Description" : "Server mod that enables spectating through deathcam.",
+	"Version": "0.0.1",
+	"LoadPriority": 2,
+	
+	"Scripts": [
+		{
+			"Path": "spectator.nut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "CustomSpectator_Init"
+			}
+		}
+	],
+	
+	"ConVars": [
+		{
+			"Name": "spectator_chatinfo",
+			"DefaultValue": "false"
+		},
+		{
+			"Name": "spectator_chatinfo_interval",
+			"DefaultValue": "300"
+		},
+		{
+			"Name": "spectator_chatinfo_message",
+			"DefaultValue": "To spectate someone type spec NICKNAME in the console. To exit spectator type endspec."
+		}
+	]
+}
