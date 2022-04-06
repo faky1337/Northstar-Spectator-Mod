@@ -125,7 +125,7 @@ void function SpectateThread_MP( entity player, entity attacker )
 	player.ClearParent()
 
 	// do some pre-replay stuff if we're gonna do a replay
-	float replayLength = 2.0 // spectator mod: less = less delay, more = more stable
+	float replayLength = 5.0 // spectator mod: less = less delay, more = more stable
 	bool shouldDoReplay = Replay_IsEnabled() && KillcamsEnabled() && IsValid( attacker ) // had to remove this for spectate ==> && ShouldDoReplay( player, attacker, replayLength, methodOfDeath )
 	table replayTracker = { validTime = null }
 	if ( shouldDoReplay )
@@ -159,6 +159,11 @@ void function SpectateThread_MP( entity player, entity attacker )
 
 		isspeccing[playerID] = true
 		thread PlayerWatchesKillReplayWrapperSpectate( player, attacker, respawnTime, timeOfDeath, beforeTime, replayTracker )
+	}
+	else
+	{
+		// if a player disconnects or spectated player gets invalid do endspec, otherwise people can play and cannot use spec command anymore, because script thinks they are still speccing
+		ClientCommandCallbackEndSpectator( player, ["null"] )
 	}
 
 	player.SetPlayerSettings( "spectator" ) // prevent a crash with going from titan => pilot on respawn
