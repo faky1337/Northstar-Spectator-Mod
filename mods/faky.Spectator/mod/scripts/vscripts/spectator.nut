@@ -75,6 +75,7 @@ void function SpectatorChatMessageThread()
 	while(true)
 	{
 		wait GetConVarFloat( "spectator_chatinfo_interval" )
-		Chat_ServerBroadcast( GetConVarString( "spectator_chatinfo_message" ) )
+		if(GetConVarBool( "spectator_chatinfo" ) )
+			Chat_ServerBroadcast( GetConVarString( "spectator_chatinfo_message" ) )
 	}
 }
