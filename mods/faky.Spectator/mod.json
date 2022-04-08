@@ -1,7 +1,7 @@
 {
 	"Name" : "faky.Spectator",
 	"Description" : "Allows everyone to sp",
-	"Version": "0.1.0",
+	"Version": "0.1.1",
 	"LoadPriority": 2,
 
 	"Scripts": [
