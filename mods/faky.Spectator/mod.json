@@ -1,7 +1,7 @@
 {
 	"Name" : "faky.Spectator",
-	"Description" : "Allows everyone to sp",
-	"Version": "0.1.1",
+	"Description" : "Allows everyone to spectate.",
+	"Version": "0.2.0",
 	"LoadPriority": 2,
 
 	"Scripts": [
@@ -25,11 +25,7 @@
 		},
 		{
 			"Name": "spectator_chatinfo_message",
-			"DefaultValue": "To spectate someone type spec NICKNAME or spec PARTOFNAME in the console."
-		},
-		{
-			"Name": "spectator_selfspec_allow",
-			"DefaultValue": "false"
+			"DefaultValue": "To spectate type spec in the console. Press A/D (LEFT/RIGHT) to change player."
 		}
 	]
 }
