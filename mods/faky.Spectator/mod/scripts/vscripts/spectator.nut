@@ -8,6 +8,13 @@ struct
 	array<entity> spectateTargets = []
 } file
 
+enum spectateCycle
+{
+	NONE,
+	NEXT,
+	PREVIOUS
+}
+
 void function CustomSpectator_Init()
 {
 	if( GetConVarBool( "spectator_chatinfo" ) )
@@ -42,12 +49,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 
 	if( GetGameState() == eGameState.Playing )
 	{
-		entity target = GetPlayerByIndex(0)
-		if( player in file.lastSpectated )
-		{
-			if( IsValid( file.lastSpectated[ player ] ) )
-				target = file.lastSpectated[ player ]
-		}
+		entity target = FindSpectateTarget( player, spectateCycle.NONE )
 
 		// if user typed in name
 		if( args.len() > 0)
@@ -85,11 +87,13 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 			player.Die()
 
 		//just cycle to next player if current player has actually index 0 (if youre hosting a private match from the game)
+		/*
 		if( target == player )
 		{
 			SpectatorCycleNext( player )
 			return true
 		}
+		*/
 
 		SpectateCamera( player, target )
 	}
@@ -123,89 +127,58 @@ void function SpectateCamera( entity player, entity target )
 	}
 }
 
-
-//watch out!!!! absolute shitshow coming up for cyclenext and previous. this needs to be redone holy fuck.
-// sorry if you have to read this :|
-bool function SpectatorCycleNext( entity player )
+entity function FindSpectateTarget( entity player, int cycleDirection )
 {
-	entity lastSpectated = GetPlayerByIndex(0)
+	entity lastSpectated = GetPlayerByIndex(0) //entity of last spectated player or first player
+	int nextSpectatedIndex = 0 // index of next spectated player from file.spectateTargets
+
 	if( player in file.lastSpectated )
 	{
 		lastSpectated = file.lastSpectated[ player ]
 	}
 
-	int i = file.spectateTargets.find( lastSpectated )
-	i++
-
-	if( i > ( file.spectateTargets.len() -1 ) )
+	nextSpectatedIndex = file.spectateTargets.find( lastSpectated ) //get last spectated player index first
+	switch( cycleDirection )
 	{
-		if( player == file.spectateTargets[ 0 ] )
-			{
-				if( file.spectateTargets.len() > 1 )
-				{
-					SpectateCamera( player, file.spectateTargets[ 1 ] )
-					return true
-				}
-				return true
-			}
-		SpectateCamera( player, file.spectateTargets[ 0 ] )
-		return true
-	}
-	else
-	{
-		if( player == file.spectateTargets[ i ] )
-		{
-			i++
-			if( i > file.spectateTargets.len() )
-				SpectateCamera( player, file.spectateTargets[ 0 ] )
-				return true
-		}
-		SpectateCamera( player, file.spectateTargets[ i ] )
-		return true
+		case spectateCycle.NONE:
+			break
+		case spectateCycle.NEXT:
+			nextSpectatedIndex++
+			break
+		case spectateCycle.PREVIOUS:
+			nextSpectatedIndex--
+			break
 	}
 
+	if( nextSpectatedIndex > file.spectateTargets.len() -1 )
+		nextSpectatedIndex = 0
+	if( nextSpectatedIndex < 0 )
+		nextSpectatedIndex = file.spectateTargets.len() -1
+
+	if( player == file.spectateTargets[ nextSpectatedIndex ] && cycleDirection == spectateCycle.NEXT )
+		nextSpectatedIndex++
+	else if( player == file.spectateTargets[ nextSpectatedIndex ] && cycleDirection == spectateCycle.PREVIOUS )
+		nextSpectatedIndex--
+
+	if( nextSpectatedIndex > file.spectateTargets.len() -1 )
+		nextSpectatedIndex = 0
+	if( nextSpectatedIndex < 0 )
+		nextSpectatedIndex = file.spectateTargets.len() -1
+
+	return file.spectateTargets[ nextSpectatedIndex ]
+}
+
+bool function SpectatorCycleNext( entity player )
+{
+	entity target = FindSpectateTarget( player, spectateCycle.NEXT )
+	SpectateCamera( player, target )
 	return true
 }
 
-//shit #2
 bool function SpectatorCyclePrevious( entity player )
 {
-	entity lastSpectated = GetPlayerByIndex(0)
-	if( player in file.lastSpectated )
-	{
-		lastSpectated = file.lastSpectated[ player ]
-	}
-
-	int i = file.spectateTargets.find( lastSpectated )
-	i--
-
-	if( i  < 0 )
-	{
-		int len = ( file.spectateTargets.len() -1 )
-		if( player == file.spectateTargets[ len ] )
-		{
-			len--
-			if( len == -1)
-				return true
-		}
-		SpectateCamera( player, file.spectateTargets[ len ] )
-		return true
-	}
-	else
-		if( player == file.spectateTargets[ i ] )
-		{
-			i--
-			if( i < 0 )
-			{
-				int len = ( file.spectateTargets.len() -1 )
-				SpectateCamera( player, file.spectateTargets[ len ] )
-				return true
-			}
-		}
-		if( i < 0 )
-			return true
-		SpectateCamera( player, file.spectateTargets[ i ] )
-
+	entity target = FindSpectateTarget( player, spectateCycle.PREVIOUS )
+	SpectateCamera( player, target )
 	return true
 }
 
@@ -213,6 +186,7 @@ void function SpectatorRemoveCycle( entity player )
 {
 	if (player in file.lastSpectated)
 		delete file.lastSpectated[ player ]
+
 	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
 	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 }
