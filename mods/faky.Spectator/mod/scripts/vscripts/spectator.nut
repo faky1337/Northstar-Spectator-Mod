@@ -17,13 +17,11 @@ enum spectateCycle
 
 void function CustomSpectator_Init()
 {
-	if( GetConVarInt( "spectator_chatinfo" ) == 1)
-		print( "[SPECTATOR MOD] enabled spectator chatinfo, starting thread" )
-		thread SpectatorChatMessageThread()
+	print( "[SPECTATOR MOD] starting thread for spectator chatinfo" )
+	thread SpectatorChatMessageThread()
 
 	AddClientCommandCallback( "spec", ClientCommandCallbackSpectate )
 
-	//remove next/previous cycle on respawn
 	AddCallback_OnPlayerRespawned( SpectatorRemoveCycle )
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnClientDisconnected( OnClientDisconnected )
@@ -68,7 +66,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 
 	if( GetGameState() == eGameState.Playing )
 	{
-		entity target = FindSpectateTarget( player, spectateCycle.NONE )
+		entity target = SpectatorFindTarget( player, spectateCycle.NONE )
 
 		// if user typed in name
 		if( args.len() > 0 )
@@ -89,7 +87,6 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 				}
 			}
 		}
-
 
 		AddPlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
 		AddPlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
@@ -137,7 +134,7 @@ void function SpectateCamera( entity player, entity target )
 	}
 }
 
-entity function FindSpectateTarget( entity player, int cycleDirection )
+entity function SpectatorFindTarget( entity player, int cycleDirection )
 {
 	entity lastSpectated = GetPlayerByIndex(0) //entity of last spectated player or first player
 	int nextSpectatedIndex = 0 // index of next spectated player from file.spectateTargets
@@ -180,14 +177,14 @@ entity function FindSpectateTarget( entity player, int cycleDirection )
 
 bool function SpectatorCycleNext( entity player )
 {
-	entity target = FindSpectateTarget( player, spectateCycle.NEXT )
+	entity target = SpectatorFindTarget( player, spectateCycle.NEXT )
 	SpectateCamera( player, target )
 	return true
 }
 
 bool function SpectatorCyclePrevious( entity player )
 {
-	entity target = FindSpectateTarget( player, spectateCycle.PREVIOUS )
+	entity target = SpectatorFindTarget( player, spectateCycle.PREVIOUS )
 	SpectateCamera( player, target )
 	return true
 }

@@ -27,4 +27,4 @@ Default: `"To spectate type spec in the console. Press A/D (LEFT/RIGHT) to chang
 `spectator_afterdeathcam`  
 Accepted values: `0`, `1`  
 Default: `0`
-Description: Automatically switch to spectator after death cam of a player has ended.
+Description: Automatically switch to spectator after death cam has ended.
