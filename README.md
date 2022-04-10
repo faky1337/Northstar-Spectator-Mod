@@ -23,3 +23,8 @@ Default: `300` (5 minutes)
 `spectator_chatinfo_message`  
 Accepted values: any string  
 Default: `"To spectate type spec in the console. Press A/D (LEFT/RIGHT) to change player."`
+
+`spectator_afterdeathcam`  
+Accepted values: `0`, `1`  
+Default: `0`
+Description: Automatically switch to spectator after death cam of a player has ended.

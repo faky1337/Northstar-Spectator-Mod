@@ -27,6 +27,7 @@ void function CustomSpectator_Init()
 	AddCallback_OnPlayerRespawned( SpectatorRemoveCycle )
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnClientDisconnected( OnClientDisconnected )
+	AddCallback_OnPlayerKilled( OnPlayerKilled )
 }
 
 void function OnClientConnected( entity player )
@@ -39,6 +40,23 @@ void function OnClientDisconnected( entity player )
 {
 	int i = file.spectateTargets.find( player )
 	file.spectateTargets.remove( i )
+}
+
+void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
+{
+	if( GetConVarInt( "spectator_afterdeathcam" ) == 1 )
+		thread OnPlayerKilledThread( victim, attacker )
+}
+
+void function OnPlayerKilledThread( entity victim, entity attacker )
+{
+	float deathCamlength = GetDeathCamLength( victim )
+	wait deathCamlength + 9 //add 9 seconds just to make sure every sort of death cam is over
+	if( !IsAlive( victim ) )
+	{
+		array<string> args
+		ClientCommandCallbackSpectate( victim, args )
+	}
 }
 
 bool function ClientCommandCallbackSpectate(entity player, array<string> args)
@@ -86,15 +104,6 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 		if( IsAlive( player ) )
 			player.Die()
 
-		//just cycle to next player if current player has actually index 0 (if youre hosting a private match from the game)
-		/*
-		if( target == player )
-		{
-			SpectatorCycleNext( player )
-			return true
-		}
-		*/
-
 		SpectateCamera( player, target )
 	}
 	else
@@ -123,7 +132,7 @@ void function SpectateCamera( entity player, entity target )
 		player.SetObserverTarget( target )
 		player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) //first
 		player.SetViewEntity( player.GetObserverTarget(), true ) // first person
-		//player.StartObserverMode( OBS_MODE_IN_EYE_SIMPLE ) // change observermode not needed?
+		player.StartObserverMode( OBS_MODE_IN_EYE_SIMPLE ) // change observermode not needed?
 	}
 }
 

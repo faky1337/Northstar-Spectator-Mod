@@ -26,6 +26,10 @@
 		{
 			"Name": "spectator_chatinfo_message",
 			"DefaultValue": "To spectate type spec in the console. Press A/D (LEFT/RIGHT) to change player."
+		},
+		{
+			"Name": "spectator_afterdeathcam",
+			"DefaultValue": "0"
 		}
 	]
 }
