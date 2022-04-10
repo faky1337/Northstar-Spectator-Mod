@@ -17,7 +17,7 @@ enum spectateCycle
 
 void function CustomSpectator_Init()
 {
-	if( GetConVarBool( "spectator_chatinfo" ) )
+	if( GetConVarInt( "spectator_chatinfo" ) == 1)
 		print( "[SPECTATOR MOD] enabled spectator chatinfo, starting thread" )
 		thread SpectatorChatMessageThread()
 
@@ -196,7 +196,7 @@ void function SpectatorChatMessageThread()
 	while(true)
 	{
 		wait GetConVarFloat( "spectator_chatinfo_interval" )
-		if(GetConVarBool( "spectator_chatinfo" ) )
+		if(GetConVarInt( "spectator_chatinfo" ) == 1 )
 			Chat_ServerBroadcast( GetConVarString( "spectator_chatinfo_message" ) )
 	}
 }

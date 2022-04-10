@@ -13,8 +13,8 @@ Type `spec pla` to spec a player whose name has `pla` in his name (would for exa
 You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them.
 
 `spectator_chatinfo`  
-Accepted values: `true`, `false`  
-Default: `false`
+Accepted values: `0`, `1`  
+Default: `0`
 
 `spectator_chatinfo_interval`  
 Accepted values: any integer  

@@ -1,7 +1,7 @@
 {
 	"Name" : "faky.Spectator",
 	"Description" : "Allows everyone to spectate.",
-	"Version": "0.2.0",
+	"Version": "0.2.1",
 	"LoadPriority": 2,
 
 	"Scripts": [
@@ -17,7 +17,7 @@
 	"ConVars": [
 		{
 			"Name": "spectator_chatinfo",
-			"DefaultValue": "false"
+			"DefaultValue": "0"
 		},
 		{
 			"Name": "spectator_chatinfo_interval",
