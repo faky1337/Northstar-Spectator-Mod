@@ -14,7 +14,7 @@ You can use following ConVars to edit the config on the run or add them to your 
 
 `spectator_chatinfo`  
 Accepted values: `0`, `1`  
-Default: `0`
+Default: `1`
 
 `spectator_chatinfo_interval`  
 Accepted values: any integer  

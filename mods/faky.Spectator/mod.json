@@ -17,7 +17,7 @@
 	"ConVars": [
 		{
 			"Name": "spectator_chatinfo",
-			"DefaultValue": "0"
+			"DefaultValue": "1"
 		},
 		{
 			"Name": "spectator_chatinfo_interval",
