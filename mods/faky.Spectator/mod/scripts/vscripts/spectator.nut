@@ -155,7 +155,7 @@ entity function FindSpectateTarget( entity player, int cycleDirection )
 	if( nextSpectatedIndex < 0 )
 		nextSpectatedIndex = file.spectateTargets.len() -1
 
-	if( player == file.spectateTargets[ nextSpectatedIndex ] && cycleDirection == spectateCycle.NEXT )
+	if( player == file.spectateTargets[ nextSpectatedIndex ] && ( cycleDirection == spectateCycle.NEXT || cycleDirection == spectateCycle.NONE ) )
 		nextSpectatedIndex++
 	else if( player == file.spectateTargets[ nextSpectatedIndex ] && cycleDirection == spectateCycle.PREVIOUS )
 		nextSpectatedIndex--
