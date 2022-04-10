@@ -40,6 +40,7 @@ void function OnClientDisconnected( entity player )
 {
 	int i = file.spectateTargets.find( player )
 	file.spectateTargets.remove( i )
+	print( "[SPECTATOR MOD] removed " + player.GetPlayerName() + " from spectateTargets." )
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -51,7 +52,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 void function OnPlayerKilledThread( entity victim, entity attacker )
 {
 	float deathCamlength = GetDeathCamLength( victim )
-	wait deathCamlength + 9 //add 9 seconds just to make sure every sort of death cam is over
+	wait deathCamlength + 9 //add seconds just to make sure every sort of death cam is over
 	if( !IsAlive( victim ) )
 	{
 		array<string> args
@@ -70,7 +71,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 		entity target = FindSpectateTarget( player, spectateCycle.NONE )
 
 		// if user typed in name
-		if( args.len() > 0)
+		if( args.len() > 0 )
 		{
 			foreach( playerfromarray in GetPlayerArray() ) //find target
 			{
@@ -82,7 +83,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 					if( ( player == target ) )
 					{
 						print( "[SPECTATOR MOD] Spectating yourself is disabled" )
-						Chat_ServerPrivateMessage(player, "[SPECTATOR MOD] Spectating yourself is disabled", true)
+						Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating yourself is disabled", true )
 						return true
 					}
 				}
@@ -94,10 +95,10 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 		AddPlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 
 		//if we did not find a target before even user specified string in args
-		if( target == player && args.len() > 0)
+		if( target == player && args.len() > 0 )
 		{
 			print( "[SPECTATOR MOD] Did not find specified player." )
-			Chat_ServerPrivateMessage(player, "[SPECTATOR MOD] Did not find specified player.", true)
+			Chat_ServerPrivateMessage (player, "[SPECTATOR MOD] Did not find specified player.", true )
 			return true
 		}
 
@@ -109,7 +110,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 	else
 	{
 		print( "[SPECTATOR MOD] Spactator is only available in Playing gamestate")
-		Chat_ServerPrivateMessage(player, "[SPECTATOR MOD] Spactator is only available in Playing gamestate", false)
+		Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spactator is only available in Playing gamestate", false )
 	}
 
 	return true
@@ -120,7 +121,7 @@ void function SpectateCamera( entity player, entity target )
 	file.lastSpectated[ player ] <- target
 
 	print( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
-	Chat_ServerPrivateMessage(player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false)
+	Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false )
 	if( IsAlive( player ) )
 		player.Die()
 
@@ -130,9 +131,9 @@ void function SpectateCamera( entity player, entity target )
 	if( IsAlive( target ) )
 	{
 		player.SetObserverTarget( target )
-		player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) //first
-		player.SetViewEntity( player.GetObserverTarget(), true ) // first person
-		player.StartObserverMode( OBS_MODE_IN_EYE_SIMPLE ) // change observermode not needed?
+		player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
+		player.SetViewEntity( player.GetObserverTarget(), true )
+		player.StartObserverMode( OBS_MODE_IN_EYE_SIMPLE ) // start observermode not needed? not sure I'll just keep it
 	}
 }
 

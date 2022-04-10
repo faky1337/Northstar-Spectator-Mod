@@ -10,7 +10,7 @@ Type `spec pla` to spec a player whose name has `pla` in his name (would for exa
 1) Display the name of spectate target (can't send chat messages to player while spectating with `Chat_ServerPrivateMessage` or use OBS_MODE_IN_EYE on to display name card, because OBS_MODE_IN_EYE/THIRD_PERSON seem to only work on same team).
 
 ## ConVars for chat announcements
-You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them.
+You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them on server start.
 
 `spectator_chatinfo`  
 Accepted values: `0`, `1`  
