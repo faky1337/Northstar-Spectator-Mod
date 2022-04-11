@@ -7,6 +7,7 @@ Unfortunately it does not display names, but you can call the `spec` function wi
 - Changed ConVars from Bool to Int (please update your config files) because somehow I am too stupid to make them work.
 - Fix bug: spectator_chatinfo_message not appearing.
 - Replaced spectator cycle function with something less shitty.
+- !Hotfix crash when attacker was not a player.
 
 ## Usage
 Type `spec` into console. Use A/D (LEFT/RIGHT) to switch between players.  

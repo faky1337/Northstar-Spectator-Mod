@@ -52,7 +52,8 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 	float deathCamlength = GetDeathCamLength( victim )
 	array<string> args
 
-	args.append( attacker.GetPlayerName() )
+	if( IsValidPlayer( attacker ) ) // try to fix a crash "[SERVER] Entity class "CBaseEntity" doesn't match required class for this index or function call"
+		args.append( attacker.GetPlayerName() )
 
 	wait deathCamlength + 9 //add seconds just to make sure every sort of death cam is over
 	if( !IsAlive( victim ) )
