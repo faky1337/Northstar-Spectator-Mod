@@ -43,7 +43,7 @@ void function OnClientDisconnected( entity player )
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
-	if( GetConVarInt( "spectator_afterdeathcam" ) == 1 )
+	if( GetConVarInt( "spectator_afterdeathcam" ) == 1 && !( victim == attacker) ) // don't spectate if player killed himself
 		thread OnPlayerKilledThread( victim, attacker )
 }
 
@@ -133,7 +133,7 @@ void function SpectateCamera( entity player, entity target )
 		player.SetObserverTarget( target )
 		player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
 		player.SetViewEntity( player.GetObserverTarget(), true )
-		player.StartObserverMode( OBS_MODE_IN_EYE_SIMPLE ) // start observermode not needed? not sure I'll just keep it
+		//player.StartObserverMode( OBS_MODE_IN_EYE_SIMPLE )
 	}
 }
 
