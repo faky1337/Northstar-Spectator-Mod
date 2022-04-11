@@ -50,10 +50,13 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 void function OnPlayerKilledThread( entity victim, entity attacker )
 {
 	float deathCamlength = GetDeathCamLength( victim )
+	array<string> args
+
+	args.append( attacker.GetPlayerName() )
+
 	wait deathCamlength + 9 //add seconds just to make sure every sort of death cam is over
 	if( !IsAlive( victim ) )
 	{
-		array<string> args
 		ClientCommandCallbackSpectate( victim, args )
 	}
 }
