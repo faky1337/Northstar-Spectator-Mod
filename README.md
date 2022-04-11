@@ -6,7 +6,7 @@ Unfortunately it does not display names, but you can call the `spec` function wi
 - Add function "Automatically spectate your killer after death cam has ended" and related ConVar(int) `spectator_afterdeathcam`.
 - Changed ConVars from Bool to Int (please update your config files) because somehow I am too stupid to make them work.
 - Fix bug: spectator_chatinfo_message not appearing.
-- Replaced spectator cycle function which something less shitty.
+- Replaced spectator cycle function whith something less shitty.
 
 ## Usage
 Type `spec` into console. Use A/D (LEFT/RIGHT) to switch between players.  
