@@ -1,7 +1,7 @@
 {
 	"Name" : "faky.Spectator",
 	"Description" : "Allows everyone to spectate.",
-	"Version": "0.2.2",
+	"Version": "0.2.3",
 	"LoadPriority": 2,
 
 	"Scripts": [
@@ -29,7 +29,7 @@
 		},
 		{
 			"Name": "spectator_afterdeathcam",
-			"DefaultValue": "0"
+			"DefaultValue": "1"
 		}
 	]
 }
