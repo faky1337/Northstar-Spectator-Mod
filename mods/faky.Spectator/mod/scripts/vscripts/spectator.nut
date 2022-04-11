@@ -17,7 +17,7 @@ enum spectateCycle
 
 void function CustomSpectator_Init()
 {
-	print( "[SPECTATOR MOD] starting thread for spectator chatinfo" )
+	print( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
 	thread SpectatorChatMessageThread()
 
 	AddClientCommandCallback( "spec", ClientCommandCallbackSpectate )

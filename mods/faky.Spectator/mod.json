@@ -1,6 +1,6 @@
 {
 	"Name" : "faky.Spectator",
-	"Description" : "Allows everyone to spectate.",
+	"Description" : "Server side mod that allows every player to spectate everyone.",
 	"Version": "0.2.3",
 	"LoadPriority": 2,
 

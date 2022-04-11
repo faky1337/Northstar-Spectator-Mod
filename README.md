@@ -1,5 +1,5 @@
 # Spectator Mod
-Spectate everyone on the server.  
+Server side mod that allows every player to spectate everyone.  
 Unfortunately it does not display names, but you can call the `spec` function with a string argument to spectate someone specific.
 
 ## Changes
