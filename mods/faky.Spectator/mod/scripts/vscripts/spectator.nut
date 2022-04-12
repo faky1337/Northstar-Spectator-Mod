@@ -5,6 +5,7 @@ global float spectatorPressedDebounceTime = 0.4
 struct
 {
 	table<entity, entity> lastSpectated = {}
+	table<entity, int> lastTeam = {}
 	array<entity> spectateTargets = []
 } file
 
@@ -17,6 +18,11 @@ enum spectateCycle
 
 void function CustomSpectator_Init()
 {
+	if( IsFFAGame() )
+	{
+		print( "[SPECTATOR MOD] Incompatible gamemode detected." )
+		return
+	}
 	print( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
 	thread SpectatorChatMessageThread()
 
@@ -43,8 +49,24 @@ void function OnClientDisconnected( entity player )
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
+	int victimTeam = victim.GetTeam()
+	file.lastTeam[ victim ] <- victimTeam
 	if( GetConVarInt( "spectator_afterdeathcam" ) == 1 && !( victim == attacker) ) // don't spectate if player killed himself
 		thread OnPlayerKilledThread( victim, attacker )
+}
+
+void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPlayerRespawned
+{
+	if ( player in file.lastSpectated )
+		delete file.lastSpectated[ player ]
+
+	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
+	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
+	if ( player in file.lastTeam )
+	{
+		SetTeam( player, file.lastTeam[ player ])
+		delete file.lastTeam[ player ]
+	}
 }
 
 void function OnPlayerKilledThread( entity victim, entity attacker )
@@ -106,7 +128,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 		if( IsAlive( player ) )
 			player.Die()
 
-		SpectateCamera( player, target )
+		thread SpectateCamera( player, target )
 	}
 	else
 	{
@@ -131,10 +153,25 @@ void function SpectateCamera( entity player, entity target )
 
 	if( IsAlive( target ) )
 	{
+		int playerTeam = player.GetTeam()
+		int targetTeam = target.GetTeam()
+		if( playerTeam != targetTeam )
+		{
+			SetTeam( player, targetTeam )
+		}
+
 		player.SetObserverTarget( target )
 		player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
 		player.SetViewEntity( player.GetObserverTarget(), true )
-		//player.StartObserverMode( OBS_MODE_IN_EYE_SIMPLE )
+
+		float deathcamLength = GetDeathCamLength( player )
+		wait deathcamLength
+		//player.StopObserverMode()
+		if( !IsAlive( player ) )
+		{
+			player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
+			player.StartObserverMode( OBS_MODE_IN_EYE )
+		}
 	}
 }
 
@@ -182,24 +219,15 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 bool function SpectatorCycleNext( entity player )
 {
 	entity target = SpectatorFindTarget( player, spectateCycle.NEXT )
-	SpectateCamera( player, target )
+	thread SpectateCamera( player, target )
 	return true
 }
 
 bool function SpectatorCyclePrevious( entity player )
 {
 	entity target = SpectatorFindTarget( player, spectateCycle.PREVIOUS )
-	SpectateCamera( player, target )
+	thread SpectateCamera( player, target )
 	return true
-}
-
-void function SpectatorRemoveCycle( entity player )
-{
-	if (player in file.lastSpectated)
-		delete file.lastSpectated[ player ]
-
-	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
-	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 }
 
 void function SpectatorChatMessageThread()
