@@ -18,11 +18,6 @@ enum spectateCycle
 
 void function CustomSpectator_Init()
 {
-	if( IsFFAGame() )
-	{
-		print( "[SPECTATOR MOD] Incompatible gamemode detected." )
-		return
-	}
 	print( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
 	thread SpectatorChatMessageThread()
 
@@ -32,6 +27,21 @@ void function CustomSpectator_Init()
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnClientDisconnected( OnClientDisconnected )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
+}
+
+
+void function ThreadWaitPlayerRespawnStarted( entity player )
+{
+	string playerName = player.GetPlayerName()
+	print( "[SPECTATOR MOD] Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
+
+	player.WaitSignal( "RespawnMe" )
+
+	//this just seems works if you use it before/just right after signal "RespawnMe"!
+	player.StopObserverMode()
+	player.SetSpecReplayDelay( 0.0 )
+
+	print( "[SPECTATOR MOD] Ended ThreadWaitPlayerRespawnStarted for " + playerName )
 }
 
 void function OnClientConnected( entity player )
@@ -49,6 +59,7 @@ void function OnClientDisconnected( entity player )
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
+	thread ThreadWaitPlayerRespawnStarted( victim )
 	int victimTeam = victim.GetTeam()
 	file.lastTeam[ victim ] <- victimTeam
 	if( GetConVarInt( "spectator_afterdeathcam" ) == 1 && !( victim == attacker) ) // don't spectate if player killed himself
@@ -62,7 +73,7 @@ void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPl
 
 	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
 	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
-	if ( player in file.lastTeam )
+	if ( player in file.lastTeam && !IsFFAGame() )
 	{
 		SetTeam( player, file.lastTeam[ player ])
 		delete file.lastTeam[ player ]
@@ -74,7 +85,7 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 	float deathCamlength = GetDeathCamLength( victim )
 	array<string> args
 
-	if( IsValidPlayer( attacker ) ) // try to fix a crash "[SERVER] Entity class "CBaseEntity" doesn't match required class for this index or function call"
+	if( IsValidPlayer( attacker ) ) // make sure it's a player because victim could be killed by world/oob/..?
 		args.append( attacker.GetPlayerName() )
 
 	wait deathCamlength + 9 //add seconds just to make sure every sort of death cam is over
@@ -117,7 +128,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 		AddPlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
 		AddPlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 
-		//if we did not find a target before even user specified string in args
+		// if we did not find a target before even user specified string in args
 		if( target == player && args.len() > 0 )
 		{
 			print( "[SPECTATOR MOD] Did not find specified player." )
@@ -141,6 +152,10 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 
 void function SpectateCamera( entity player, entity target )
 {
+	// if player started spawning as titan or player wants to watch himself
+	if( player.isSpawning || player == target )
+		return
+
 	file.lastSpectated[ player ] <- target
 
 	print( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
@@ -148,14 +163,11 @@ void function SpectateCamera( entity player, entity target )
 	if( IsAlive( player ) )
 		player.Die()
 
-	if( player == target )
-		return
-
 	if( IsAlive( target ) )
 	{
 		int playerTeam = player.GetTeam()
 		int targetTeam = target.GetTeam()
-		if( playerTeam != targetTeam )
+		if( playerTeam != targetTeam && !IsFFAGame() )
 		{
 			SetTeam( player, targetTeam )
 		}
@@ -166,11 +178,15 @@ void function SpectateCamera( entity player, entity target )
 
 		float deathcamLength = GetDeathCamLength( player )
 		wait deathcamLength
-		//player.StopObserverMode()
+		if( player.isSpawning )
+			return
+
+		//If player started spawning as titan
 		if( !IsAlive( player ) )
 		{
 			player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
-			player.StartObserverMode( OBS_MODE_IN_EYE )
+			if( !IsFFAGame() )
+				player.StartObserverMode( OBS_MODE_IN_EYE )
 		}
 	}
 }
