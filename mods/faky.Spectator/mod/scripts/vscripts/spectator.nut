@@ -89,9 +89,9 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 		args.append( attacker.GetPlayerName() )
 
 	wait deathCamlength + 9 //add seconds just to make sure every sort of death cam is over
-	if( !IsAlive( victim ) )
+	if( !IsAlive( victim ) && IsValidPlayer( victim ) )
 	{
-		ClientCommandCallbackSpectate( victim, args )
+		ClientCommandCallbackSpectate( victim, args ) // CRASH SCRIPT ERROR: [SERVER] Attempted to call GetSendInputCallbacks on invalid entity
 	}
 }
 
@@ -182,9 +182,9 @@ void function SpectateCamera( entity player, entity target )
 			return
 
 		//If player started spawning as titan
-		if( !IsAlive( player ) )
+		if( !IsAlive( player ) && IsValidPlayer( player ) )
 		{
-			player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
+			player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) // CRASH SCRIPT ERROR: [SERVER] Attempted to call SetSpecReplayDelay on invalid entity
 			if( !IsFFAGame() )
 				player.StartObserverMode( OBS_MODE_IN_EYE )
 		}

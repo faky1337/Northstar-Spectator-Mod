@@ -9,6 +9,7 @@ You can call the `spec` function with a string argument to spectate someone spec
 - Replaced spectator cycle function with something less shitty.
 - !Hotfix: crash when attacker was not a player.
 - Now displays name card of spectated player (to make it work you will switch to the enemy team when spectating, but you will be switched back on respawn). Does not work in FFA gamemodes.
+- 13 April: fix some of the frequent crashes because player entity is not valid anymore.
 ## Known issues
 - When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names.
