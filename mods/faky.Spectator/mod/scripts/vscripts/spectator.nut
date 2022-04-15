@@ -293,7 +293,10 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 			if( loops >= spectateTargetsCount )
 				break
 
-			nextSpectatedIndex++
+			if( cycleDirection == spectateCycle.PREVIOUS )
+				nextSpectatedIndex--
+			else
+				nextSpectatedIndex++
 		}
 
 	return file.spectateTargets[ nextSpectatedIndex ]
