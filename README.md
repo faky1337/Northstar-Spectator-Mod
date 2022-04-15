@@ -1,6 +1,7 @@
 # Spectator Mod
 Server side mod that allows every player to spectate everyone.  
-You can call the `spec` function with a string argument to spectate someone specific.
+You can call the `spec` function with a string argument to spectate someone specific.  
+Please not that this is absolutely not stable, if you experience crashes do not hesitate to send me your log on Discord faky#2514.
 
 ## Changes
 - Add function "Automatically spectate your killer after death cam has ended" and related ConVar(int) `spectator_afterdeathcam`.
@@ -10,17 +11,19 @@ You can call the `spec` function with a string argument to spectate someone spec
 - !Hotfix: crash when attacker was not a player.
 - Now displays name card of spectated player (to make it work you will switch to the enemy team when spectating, but you will be switched back on respawn). Does not work in FFA gamemodes.
 - 13 April: fix some of the frequent crashes because player entity is not valid anymore.
+- 15 April: fix cam sometimes switching again / name card appearing late.
 ## Known issues
 - When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names.
 - If you go OOB, immediately spec, immediately spawn in as titan => you will get killed (by OOB timer?)
-
+- When a new player joins and you are spectating the enemy team: Teams will get unbalanced
+- When a player is having a timeout and rejoins before the server knows, that the client is having a timeout => crash
+- To spectate enemies we need to switch to the enemy team until I figure out how it works without switching :)
 ## Usage
 Type `spec` into console. Use A/D (LEFT/RIGHT) to switch between players.  
 Type `spec pla` to spec a player whose name has `pla` in his name (would for example spectate on "player" now).
-
 ## ConVars for chat announcements
-You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them on server start.
+You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them on server start.  
 
 `spectator_chatinfo`  
 Accepted values: `0`, `1`  

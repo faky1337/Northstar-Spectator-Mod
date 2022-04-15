@@ -27,10 +27,13 @@ void function CustomSpectator_Init()
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnClientDisconnected( OnClientDisconnected )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
+
+	RegisterSignal( "SpectatorCycle" )
+	RegisterSignal( "DeathcamOver" )
 }
 
 
-void function ThreadWaitPlayerRespawnStarted( entity player )
+void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan spawn camera works
 {
 	string playerName = player.GetPlayerName()
 	print( "[SPECTATOR MOD] Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
@@ -52,6 +55,7 @@ void function OnClientConnected( entity player )
 
 void function OnClientDisconnected( entity player )
 {
+	//BUG: if a person is about to have a timeout and joins again before the server noticing the timeout the server might crash 
 	int i = file.spectateTargets.find( player )
 	file.spectateTargets.remove( i )
 	print( "[SPECTATOR MOD] removed " + player.GetPlayerName() + " from spectateTargets." )
@@ -59,39 +63,56 @@ void function OnClientDisconnected( entity player )
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
-	thread ThreadWaitPlayerRespawnStarted( victim )
+	thread ThreadWaitPlayerRespawnStarted( victim ) // titan spawn camera workaround
 	int victimTeam = victim.GetTeam()
 	file.lastTeam[ victim ] <- victimTeam
 	if( GetConVarInt( "spectator_afterdeathcam" ) == 1 && !( victim == attacker) ) // don't spectate if player killed himself
 		thread OnPlayerKilledThread( victim, attacker )
+	thread ThreadWaitDeathcam( victim )
+}
+
+void function ThreadWaitDeathcam( entity player )
+{
+	float deathcamLength = GetDeathCamLength( player )
+	wait deathcamLength
+	player.Signal( "DeathcamOver" )
 }
 
 void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPlayerRespawned
 {
-	if ( player in file.lastSpectated )
-		delete file.lastSpectated[ player ]
-
-	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
-	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 	if ( player in file.lastTeam && !IsFFAGame() )
 	{
 		SetTeam( player, file.lastTeam[ player ])
 		delete file.lastTeam[ player ]
 	}
+
+	if ( player in file.lastSpectated )
+		delete file.lastSpectated[ player ]
+
+	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
+	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 }
 
 void function OnPlayerKilledThread( entity victim, entity attacker )
 {
+	victim.EndSignal( "OnRespawned" )
+
+	print( "[SPECTATOR MOD] OnPlayerKilledThread() started. Victim: " + victim + " Attacker: " + attacker )
 	float deathCamlength = GetDeathCamLength( victim )
+	print( "[SPECTATOR MOD] Deathcam length is: " + deathCamlength )
 	array<string> args
 
 	if( IsValidPlayer( attacker ) ) // make sure it's a player because victim could be killed by world/oob/..?
 		args.append( attacker.GetPlayerName() )
 
-	wait deathCamlength + 9 //add seconds just to make sure every sort of death cam is over
+	wait deathCamlength
+	if ( victim.IsWatchingKillReplay() )
+			victim.WaitSignal( "KillCamOver" )
+
 	if( !IsAlive( victim ) && IsValidPlayer( victim ) )
 	{
 		ClientCommandCallbackSpectate( victim, args ) // CRASH SCRIPT ERROR: [SERVER] Attempted to call GetSendInputCallbacks on invalid entity
+		print( "[SPECTATOR MOD] Called ClientCommandCallbackSpectate() from OnPlayerKilledThread(). Victim: " + victim )
 	}
 }
 
@@ -150,8 +171,10 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 	return true
 }
 
-void function SpectateCamera( entity player, entity target )
+//TODO: Rename functions
+void function SpectateCamera( entity player, entity target ) //TODO: Rename this to SpectatorCameraSetup
 {
+	print( "[SPECTATOR MOD] Called SpectateCamera() player: " + player + " target: " + target)
 	// if player started spawning as titan or player wants to watch himself
 	if( player.isSpawning || player == target )
 		return
@@ -172,23 +195,48 @@ void function SpectateCamera( entity player, entity target )
 			SetTeam( player, targetTeam )
 		}
 
-		player.SetObserverTarget( target )
-		player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
-		player.SetViewEntity( player.GetObserverTarget(), true )
-
-		float deathcamLength = GetDeathCamLength( player )
-		wait deathcamLength
+		//If player started spawning as titan
 		if( player.isSpawning )
 			return
 
-		//If player started spawning as titan
-		if( !IsAlive( player ) && IsValidPlayer( player ) )
+		SetSpectatorCamera( player, target )
+		ThreadSpectatorCameraDeathcamFix( player, target )
+	}
+}
+
+void function SetSpectatorCamera( entity player, entity target )
+{
+	if( !IsAlive( player ) && IsValidPlayer( player ) && IsValidPlayer( target ) ) //checking somethings again because we waited before!
+	{
+		player.EndSignal( "PlayerRespawnStarted" )
+		player.EndSignal( "OnRespawned" )
+
+		player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY )
+		player.SetObserverTarget( target )
+		player.SetViewEntity( player.GetObserverTarget(), true )
+
+		print( "[SPECTATOR MOD] SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) on player: " + player )
+		if( !IsFFAGame() )
 		{
-			player.SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) // CRASH SCRIPT ERROR: [SERVER] Attempted to call SetSpecReplayDelay on invalid entity
-			if( !IsFFAGame() )
-				player.StartObserverMode( OBS_MODE_IN_EYE )
+			player.StartObserverMode( OBS_MODE_IN_EYE )
+			print( "[SPECTATOR MOD] StartObserverMode( OBS_MODE_IN_EYE ) on player: " + player )
 		}
 	}
+}
+
+void function ThreadSpectatorCameraDeathcamFix( entity player, entity target )
+{
+	print( "[SPECTATOR MOD] ThreadSpectatorCameraDeathcamFix() player: " + player + " target: " + target )
+	player.EndSignal( "PlayerRespawnStarted" )
+	player.EndSignal( "OnRespawned" )
+	player.EndSignal( "SpectatorCycle" ) // sometimes if you cycle too fast the fix will crash the server!
+
+	// when calling the spec callback the player dies and resets to intermission camera after deathcam. just set the camera to once again.
+	float deathcamLength = GetDeathCamLength( player )
+	player.WaitSignal( "DeathcamOver" )
+	if ( player.IsWatchingKillReplay() )
+			player.WaitSignal( "KillCamOver" )
+	SetSpectatorCamera( player, target )
 }
 
 entity function SpectatorFindTarget( entity player, int cycleDirection )
@@ -213,7 +261,7 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 			nextSpectatedIndex--
 			break
 	}
-
+	// if end or start of array was reached
 	if( nextSpectatedIndex > file.spectateTargets.len() -1 )
 		nextSpectatedIndex = 0
 	if( nextSpectatedIndex < 0 )
@@ -224,6 +272,7 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 	else if( player == file.spectateTargets[ nextSpectatedIndex ] && cycleDirection == spectateCycle.PREVIOUS )
 		nextSpectatedIndex--
 
+	// do it again because we just changed the index
 	if( nextSpectatedIndex > file.spectateTargets.len() -1 )
 		nextSpectatedIndex = 0
 	if( nextSpectatedIndex < 0 )
@@ -234,6 +283,7 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 
 bool function SpectatorCycleNext( entity player )
 {
+	player.Signal( "SpectatorCycle" )
 	entity target = SpectatorFindTarget( player, spectateCycle.NEXT )
 	thread SpectateCamera( player, target )
 	return true
@@ -241,6 +291,7 @@ bool function SpectatorCycleNext( entity player )
 
 bool function SpectatorCyclePrevious( entity player )
 {
+	player.Signal( "SpectatorCycle" )
 	entity target = SpectatorFindTarget( player, spectateCycle.PREVIOUS )
 	thread SpectateCamera( player, target )
 	return true
