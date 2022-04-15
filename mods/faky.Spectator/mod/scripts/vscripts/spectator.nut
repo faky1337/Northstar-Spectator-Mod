@@ -108,6 +108,9 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 		args.append( attacker.GetPlayerName() )
 
 	wait deathCamlength
+	if( !IsValidPlayer( victim ) )
+		return
+
 	if ( victim.IsWatchingKillReplay() )
 			victim.WaitSignal( "KillCamOver" )
 
@@ -236,6 +239,8 @@ void function ThreadSpectatorCameraDeathcamFix( entity player, entity target )
 	// when calling the spec callback the player dies and resets to intermission camera after deathcam. just set the camera to once again.
 	float deathcamLength = GetDeathCamLength( player )
 	player.WaitSignal( "DeathcamOver" )
+	if( !IsValidPlayer ( player ) )
+		return
 	if ( player.IsWatchingKillReplay() )
 			player.WaitSignal( "KillCamOver" )
 	SetSpectatorCamera( player, target )
