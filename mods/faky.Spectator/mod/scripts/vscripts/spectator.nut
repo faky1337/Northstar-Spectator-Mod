@@ -95,6 +95,8 @@ void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPl
 
 void function OnPlayerKilledThread( entity victim, entity attacker )
 {
+	if( !IsValidPlayer( victim ) )
+		return
 	victim.EndSignal( "OnRespawned" )
 
 	LogString( "[SPECTATOR MOD] OnPlayerKilledThread() started. Victim: " + victim + " Attacker: " + attacker )
