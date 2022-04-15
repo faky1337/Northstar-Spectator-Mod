@@ -284,15 +284,16 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 			if( nextSpectatedIndex < 0 )
 				nextSpectatedIndex = file.spectateTargets.len() -1
 
-				// detect if player is alive and chose next/previous target
 			if( IsAlive( file.spectateTargets[ nextSpectatedIndex ] ) )
 			{
-				foundNoTarget = false
+				break
 			}
 
 			loops++
 			if( loops >= spectateTargetsCount )
 				break
+
+			nextSpectatedIndex++
 		}
 
 	return file.spectateTargets[ nextSpectatedIndex ]
