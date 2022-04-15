@@ -1,7 +1,7 @@
 {
 	"Name" : "faky.Spectator",
 	"Description" : "Server side mod that allows every player to spectate everyone.",
-	"Version": "0.2.8",
+	"Version": "0.2.9",
 	"LoadPriority": 2,
 
 	"Scripts": [
@@ -30,6 +30,10 @@
 		{
 			"Name": "spectator_afterdeathcam",
 			"DefaultValue": "1"
+		},
+		{
+			"Name": "spectator_log",
+			"DefaultValue": "0"
 		}
 	]
 }

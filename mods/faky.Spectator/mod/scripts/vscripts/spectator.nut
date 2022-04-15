@@ -18,7 +18,7 @@ enum spectateCycle
 
 void function CustomSpectator_Init()
 {
-	print( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
+	LogString( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
 	thread SpectatorChatMessageThread()
 
 	AddClientCommandCallback( "spec", ClientCommandCallbackSpectate )
@@ -36,7 +36,7 @@ void function CustomSpectator_Init()
 void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan spawn camera works
 {
 	string playerName = player.GetPlayerName()
-	print( "[SPECTATOR MOD] Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
+	LogString( "[SPECTATOR MOD] Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
 
 	player.WaitSignal( "RespawnMe" )
 
@@ -44,13 +44,13 @@ void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan
 	player.StopObserverMode()
 	player.SetSpecReplayDelay( 0.0 )
 
-	print( "[SPECTATOR MOD] Ended ThreadWaitPlayerRespawnStarted for " + playerName )
+	LogString( "[SPECTATOR MOD] Ended ThreadWaitPlayerRespawnStarted for " + playerName )
 }
 
 void function OnClientConnected( entity player )
 {
 	file.spectateTargets.append( player )
-	print( "[SPECTATOR MOD] added " + player.GetPlayerName() + " to spectateTargets." )
+	LogString( "[SPECTATOR MOD] added " + player.GetPlayerName() + " to spectateTargets." )
 }
 
 void function OnClientDisconnected( entity player )
@@ -58,7 +58,7 @@ void function OnClientDisconnected( entity player )
 	//BUG: if a person is about to have a timeout and joins again before the server noticing the timeout the server might crash 
 	int i = file.spectateTargets.find( player )
 	file.spectateTargets.remove( i )
-	print( "[SPECTATOR MOD] removed " + player.GetPlayerName() + " from spectateTargets." )
+	LogString( "[SPECTATOR MOD] removed " + player.GetPlayerName() + " from spectateTargets." )
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -97,9 +97,9 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 {
 	victim.EndSignal( "OnRespawned" )
 
-	print( "[SPECTATOR MOD] OnPlayerKilledThread() started. Victim: " + victim + " Attacker: " + attacker )
+	LogString( "[SPECTATOR MOD] OnPlayerKilledThread() started. Victim: " + victim + " Attacker: " + attacker )
 	float deathCamlength = GetDeathCamLength( victim )
-	print( "[SPECTATOR MOD] Deathcam length is: " + deathCamlength )
+	LogString( "[SPECTATOR MOD] Deathcam length is: " + deathCamlength )
 	array<string> args
 
 	if( IsValidPlayer( attacker ) ) // make sure it's a player because victim could be killed by world/oob/..?
@@ -112,7 +112,7 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 	if( !IsAlive( victim ) && IsValidPlayer( victim ) )
 	{
 		ClientCommandCallbackSpectate( victim, args ) // CRASH SCRIPT ERROR: [SERVER] Attempted to call GetSendInputCallbacks on invalid entity
-		print( "[SPECTATOR MOD] Called ClientCommandCallbackSpectate() from OnPlayerKilledThread(). Victim: " + victim )
+		LogString( "[SPECTATOR MOD] Called ClientCommandCallbackSpectate() from OnPlayerKilledThread(). Victim: " + victim )
 	}
 }
 
@@ -138,7 +138,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 					target = playerfromarray
 					if( ( player == target ) )
 					{
-						print( "[SPECTATOR MOD] Spectating yourself is disabled" )
+						LogString( "[SPECTATOR MOD] Spectating yourself is disabled" )
 						Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating yourself is disabled", true )
 						return true
 					}
@@ -152,7 +152,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 		// if we did not find a target before even user specified string in args
 		if( target == player && args.len() > 0 )
 		{
-			print( "[SPECTATOR MOD] Did not find specified player." )
+			LogString( "[SPECTATOR MOD] Did not find specified player." )
 			Chat_ServerPrivateMessage (player, "[SPECTATOR MOD] Did not find specified player.", true )
 			return true
 		}
@@ -164,7 +164,7 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 	}
 	else
 	{
-		print( "[SPECTATOR MOD] Spactator is only available in Playing gamestate")
+		LogString( "[SPECTATOR MOD] Spactator is only available in Playing gamestate")
 		Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spactator is only available in Playing gamestate", false )
 	}
 
@@ -174,14 +174,14 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 //TODO: Rename functions
 void function SpectateCamera( entity player, entity target ) //TODO: Rename this to SpectatorCameraSetup
 {
-	print( "[SPECTATOR MOD] Called SpectateCamera() player: " + player + " target: " + target)
+	LogString( "[SPECTATOR MOD] Called SpectateCamera() player: " + player + " target: " + target)
 	// if player started spawning as titan or player wants to watch himself
 	if( player.isSpawning || player == target )
 		return
 
 	file.lastSpectated[ player ] <- target
 
-	print( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
+	LogString( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
 	Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false )
 	if( IsAlive( player ) )
 		player.Die()
@@ -206,7 +206,7 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 
 void function SetSpectatorCamera( entity player, entity target )
 {
-	if( !IsAlive( player ) && IsValidPlayer( player ) && IsValidPlayer( target ) ) //checking somethings again because we waited before!
+	if( !IsAlive( player ) && IsValidPlayer( player ) && IsValidPlayer( target ) && IsAlive( target ) )
 	{
 		player.EndSignal( "PlayerRespawnStarted" )
 		player.EndSignal( "OnRespawned" )
@@ -215,18 +215,18 @@ void function SetSpectatorCamera( entity player, entity target )
 		player.SetObserverTarget( target )
 		player.SetViewEntity( player.GetObserverTarget(), true )
 
-		print( "[SPECTATOR MOD] SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) on player: " + player )
+		LogString( "[SPECTATOR MOD] SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) on player: " + player )
 		if( !IsFFAGame() )
 		{
 			player.StartObserverMode( OBS_MODE_IN_EYE )
-			print( "[SPECTATOR MOD] StartObserverMode( OBS_MODE_IN_EYE ) on player: " + player )
+			LogString( "[SPECTATOR MOD] StartObserverMode( OBS_MODE_IN_EYE ) on player: " + player )
 		}
 	}
 }
 
 void function ThreadSpectatorCameraDeathcamFix( entity player, entity target )
 {
-	print( "[SPECTATOR MOD] ThreadSpectatorCameraDeathcamFix() player: " + player + " target: " + target )
+	LogString( "[SPECTATOR MOD] ThreadSpectatorCameraDeathcamFix() player: " + player + " target: " + target )
 	player.EndSignal( "PlayerRespawnStarted" )
 	player.EndSignal( "OnRespawned" )
 	player.EndSignal( "SpectatorCycle" ) // sometimes if you cycle too fast the fix will crash the server!
@@ -243,6 +243,7 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 {
 	entity lastSpectated = GetPlayerByIndex(0) //entity of last spectated player or first player
 	int nextSpectatedIndex = 0 // index of next spectated player from file.spectateTargets
+	bool foundNoTarget = true
 
 	if( player in file.lastSpectated )
 	{
@@ -261,22 +262,38 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 			nextSpectatedIndex--
 			break
 	}
-	// if end or start of array was reached
-	if( nextSpectatedIndex > file.spectateTargets.len() -1 )
-		nextSpectatedIndex = 0
-	if( nextSpectatedIndex < 0 )
-		nextSpectatedIndex = file.spectateTargets.len() -1
 
-	if( player == file.spectateTargets[ nextSpectatedIndex ] && ( cycleDirection == spectateCycle.NEXT || cycleDirection == spectateCycle.NONE ) )
-		nextSpectatedIndex++
-	else if( player == file.spectateTargets[ nextSpectatedIndex ] && cycleDirection == spectateCycle.PREVIOUS )
-		nextSpectatedIndex--
+	int spectateTargetsCount = file.spectateTargets.len()
+	int loops = 0
+	while( foundNoTarget )
+		{
+			// if end or start of array was reached
+			if( nextSpectatedIndex > file.spectateTargets.len() -1 )
+				nextSpectatedIndex = 0
+			if( nextSpectatedIndex < 0 )
+				nextSpectatedIndex = file.spectateTargets.len() -1
 
-	// do it again because we just changed the index
-	if( nextSpectatedIndex > file.spectateTargets.len() -1 )
-		nextSpectatedIndex = 0
-	if( nextSpectatedIndex < 0 )
-		nextSpectatedIndex = file.spectateTargets.len() -1
+			if( player == file.spectateTargets[ nextSpectatedIndex ] && ( cycleDirection == spectateCycle.NEXT || cycleDirection == spectateCycle.NONE ) )
+				nextSpectatedIndex++
+			else if( player == file.spectateTargets[ nextSpectatedIndex ] && cycleDirection == spectateCycle.PREVIOUS )
+				nextSpectatedIndex--
+
+			// do it again because we just changed the index
+			if( nextSpectatedIndex > file.spectateTargets.len() -1 )
+				nextSpectatedIndex = 0
+			if( nextSpectatedIndex < 0 )
+				nextSpectatedIndex = file.spectateTargets.len() -1
+
+				// detect if player is alive and chose next/previous target
+			if( IsAlive( file.spectateTargets[ nextSpectatedIndex ] ) )
+			{
+				foundNoTarget = false
+			}
+
+			loops++
+			if( loops >= spectateTargetsCount )
+				break
+		}
 
 	return file.spectateTargets[ nextSpectatedIndex ]
 }
@@ -305,4 +322,10 @@ void function SpectatorChatMessageThread()
 		if(GetConVarInt( "spectator_chatinfo" ) == 1 )
 			Chat_ServerBroadcast( GetConVarString( "spectator_chatinfo_message" ) )
 	}
+}
+
+void function LogString( string logstring )
+{
+	if( GetConVarInt( "spectator_log" ) == 1 )
+		print( logstring )
 }
