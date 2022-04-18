@@ -1,3 +1,7 @@
+//TODO: detect if target dies so we can switch to next player instead of not doing anything / intermission camera
+//TODO: make player not switch team to spec enemy
+//TODO: make player not use slot when spectating
+//TODO: add some error handling to avoid server crashes?
 untyped
 global function CustomSpectator_Init
 global float spectatorPressedDebounceTime = 0.4
@@ -32,8 +36,7 @@ void function CustomSpectator_Init()
 	RegisterSignal( "DeathcamOver" )
 }
 
-
-void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan spawn camera works
+void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan spawn camera works with this mod
 {
 	string playerName = player.GetPlayerName()
 	LogString( "[SPECTATOR MOD] Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
@@ -55,10 +58,18 @@ void function OnClientConnected( entity player )
 
 void function OnClientDisconnected( entity player )
 {
-	//BUG: if a person is about to have a timeout and joins again before the server noticing the timeout the server might crash 
+	//BUG: if a person is about to have a timeout and joins again before the server noticing the timeout the server might crash
+	//Might be fixed by check 2 lines below. seems like if you reconnect fast the server actually disconnects the player twice?
 	int i = file.spectateTargets.find( player )
-	file.spectateTargets.remove( i )
-	LogString( "[SPECTATOR MOD] removed " + player.GetPlayerName() + " from spectateTargets." )
+	if( i >= 0 && i < file.spectateTargets.len() ) //check since int i might be null or something that might crash?
+	{
+		file.spectateTargets.remove( i )
+		LogString( "[SPECTATOR MOD] removed " + player.GetPlayerName() + " from spectateTargets." )
+	}
+	else
+	{
+		LogString( "[SPECTATOR MOD] Tried to remove a player from the file.spectateTargets array, but there was an error finding the player in the array" )
+	}
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -116,7 +127,7 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 
 	if( !IsAlive( victim ) && IsValidPlayer( victim ) )
 	{
-		ClientCommandCallbackSpectate( victim, args ) // CRASH SCRIPT ERROR: [SERVER] Attempted to call GetSendInputCallbacks on invalid entity
+		ClientCommandCallbackSpectate( victim, args )
 		LogString( "[SPECTATOR MOD] Called ClientCommandCallbackSpectate() from OnPlayerKilledThread(). Victim: " + victim )
 	}
 }
@@ -237,12 +248,12 @@ void function ThreadSpectatorCameraDeathcamFix( entity player, entity target )
 	player.EndSignal( "SpectatorCycle" ) // sometimes if you cycle too fast the fix will crash the server!
 
 	// when calling the spec callback the player dies and resets to intermission camera after deathcam. just set the camera to once again.
-	float deathcamLength = GetDeathCamLength( player )
+	//float deathcamLength = GetDeathCamLength( player )
 	player.WaitSignal( "DeathcamOver" )
 	if( !IsValidPlayer ( player ) )
 		return
 	if ( player.IsWatchingKillReplay() )
-			player.WaitSignal( "KillCamOver" )
+		player.WaitSignal( "KillCamOver" )
 	SetSpectatorCamera( player, target )
 }
 
