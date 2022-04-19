@@ -1,6 +1,6 @@
 {
     "name": "Spectator_Mod",
-    "version_number": "0.2.10",
+    "version_number": "0.2.11",
     "website_url": "https://github.com/RomeoCantCode/Northstar-Spectator-Mod",
     "description": "Server side mod that allows every player to spectate everyone.",
     "dependencies": [

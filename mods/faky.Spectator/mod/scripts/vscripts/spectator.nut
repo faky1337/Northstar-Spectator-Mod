@@ -1,7 +1,7 @@
 //TODO: detect if target dies so we can switch to next player instead of not doing anything / intermission camera
 //TODO: make player not switch team to spec enemy
-//TODO: make player not use slot when spectating
-//TODO: add some error handling to avoid server crashes?
+//TODO: ?make player not use slot when spectating?
+//TODO: ?add some error handling to avoid server crashes?
 untyped
 global function CustomSpectator_Init
 global float spectatorPressedDebounceTime = 0.4

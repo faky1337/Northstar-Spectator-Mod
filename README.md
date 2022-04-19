@@ -10,11 +10,12 @@ Please not that this is absolutely not stable, if you experience crashes do not 
 - Replaced spectator cycle function with something less shitty.
 - !Hotfix: crash when attacker was not a player.
 - Now displays name card of spectated player (to make it work you will switch to the enemy team when spectating, but you will be switched back on respawn). Does not work in FFA gamemodes.
-- 13 April: fix some of the frequent crashes because player entity is not valid anymore.
-- 15 April: fix cam sometimes switching again / name card appearing late.
-- 15 April: HOTFIX crash when spectated player (target) dies during deathcam duration
-- 15 April: if you cycle through players skip players not alive.
-- 15 April: You can now enable/disable logging with the ConVar `spectator_log`
+- fix some of the frequent crashes because player entity is not valid anymore.
+- fix cam sometimes switching again / name card appearing late.
+- HOTFIX crash when spectated player (target) dies during deathcam duration
+- if you cycle through players skip players not alive.
+- You can now enable/disable logging with the ConVar `spectator_log`
+- 0.2.11 Fix crash when people reconnect fast or somehow get disconnected twice in a row (no clue when that happens?).
 ## Known issues
 - When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names.
