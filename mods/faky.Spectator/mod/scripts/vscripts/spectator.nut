@@ -2,6 +2,8 @@
 //TODO: make player not switch team to spec enemy
 //TODO: ?make player not use slot when spectating?
 //TODO: ?add some error handling to avoid server crashes?
+//TODO: Only allow allowed to spec option set by CVAR
+//TODO: 
 untyped
 global function CustomSpectator_Init
 global float spectatorPressedDebounceTime = 0.4
@@ -123,7 +125,7 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 		return
 
 	if ( victim.IsWatchingKillReplay() )
-			victim.WaitSignal( "KillCamOver" )
+		victim.WaitSignal( "KillCamOver" )
 
 	if( !IsAlive( victim ) && IsValidPlayer( victim ) )
 	{
@@ -190,6 +192,9 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 //TODO: Rename functions
 void function SpectateCamera( entity player, entity target ) //TODO: Rename this to SpectatorCameraSetup
 {
+	player.EndSignal( "PlayerRespawnStarted" )
+	player.EndSignal( "OnRespawned" )
+
 	LogString( "[SPECTATOR MOD] Called SpectateCamera() player: " + player + " target: " + target)
 	// if player started spawning as titan or player wants to watch himself
 	if( player.isSpawning || player == target )
@@ -197,6 +202,12 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 
 	file.lastSpectated[ player ] <- target
 
+	WaitFrame() // wait for the frame otherwise IsWatchingKillReplay() is not true most of the time
+	if( player.IsWatchingKillReplay() )
+	{
+		player.WaitSignal( "KillCamOver" ) // wait until killcam is over
+		WaitFrame() // wait for frame because EndSignal OnRespawned might be a bit late or so?
+	}
 	LogString( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
 	Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false )
 	if( IsAlive( player ) )

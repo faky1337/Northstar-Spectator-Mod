@@ -16,6 +16,7 @@ Please not that this is absolutely not stable, if you experience crashes do not 
 - if you cycle through players skip players not alive.
 - You can now enable/disable logging with the ConVar `spectator_log`
 - 0.2.11 Fix crash when people reconnect fast or somehow get disconnected twice in a row (no clue when that happens?).
+- 0.2.12 Only start spectating/switch team if kill cam is over. This will reduce many unnecessary team swaps that mess up spawns, etc.
 ## Known issues
 - When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names.
