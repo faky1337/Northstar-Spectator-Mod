@@ -17,6 +17,8 @@ Please not that this is absolutely not stable, if you experience crashes do not 
 - You can now enable/disable logging with the ConVar `spectator_log`
 - 0.2.11 Fix crash when people reconnect fast or somehow get disconnected twice in a row (no clue when that happens?).
 - 0.2.12 Only start spectating/switch team if kill cam is over. This will reduce many unnecessary team swaps that mess up spawns, etc.
+- 0.2.13 fix a crash inside SpectateCamera() because a player entity was not valid (around line 212).
+- 0.2.13 added spectator_namecards ConVar which allows enabling/disabling name cards, which need team switches to be displayed correctly.
 ## Known issues
 - When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names.
@@ -25,10 +27,10 @@ Please not that this is absolutely not stable, if you experience crashes do not 
 - When a player is having a timeout and rejoins before the server knows, that the client is having a timeout => crash
 - To spectate enemies we need to switch to the enemy team until I figure out how it works without switching :)
 ## Usage
-Type `spec` into console. Use A/D (LEFT/RIGHT) to switch between players.  
+Type `spec` into console. Use A/D (LEFT/RIGHT) to switch between players.
 Type `spec pla` to spec a player whose name has `pla` in his name (would for example spectate on "player" now).
 ## ConVars for chat announcements
-You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them on server start.  
+You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them on server start.
 
 `spectator_chatinfo`  
 Accepted values: `0`, `1`  
@@ -54,3 +56,8 @@ Description: Automatically spectate your killer after death cam has ended.
 Accepted values: `0`, `1`  
 Default: `0`  
 Description: Enable or disable logging for this mod.
+
+`spectator_namecards`  
+Accepted values: `0`, `1`  
+Default: `1`  
+Description: Enable or disable namecards. Namecards need switching to the enemy team to be working correctly. Set this to 0 if you have issues with team switching/spawns.

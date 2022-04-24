@@ -7,6 +7,7 @@
 untyped
 global function CustomSpectator_Init
 global float spectatorPressedDebounceTime = 0.4
+int spectator_namecards
 
 struct
 {
@@ -24,6 +25,8 @@ enum spectateCycle
 
 void function CustomSpectator_Init()
 {
+	spectator_namecards = GetConVarInt( "spectator_namecards" )
+
 	LogString( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
 	thread SpectatorChatMessageThread()
 
@@ -93,7 +96,7 @@ void function ThreadWaitDeathcam( entity player )
 
 void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPlayerRespawned
 {
-	if ( player in file.lastTeam && !IsFFAGame() )
+	if ( player in file.lastTeam && !IsFFAGame() && spectator_namecards > 0 )
 	{
 		SetTeam( player, file.lastTeam[ player ])
 		delete file.lastTeam[ player ]
@@ -208,6 +211,10 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 		player.WaitSignal( "KillCamOver" ) // wait until killcam is over
 		WaitFrame() // wait for frame because EndSignal OnRespawned might be a bit late or so?
 	}
+
+	if( !IsValidPlayer( player ) || !IsValidPlayer( target ) ) // check if players are valid or we might crash later using invalid players
+		return
+
 	LogString( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
 	Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false )
 	if( IsAlive( player ) )
@@ -217,7 +224,7 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 	{
 		int playerTeam = player.GetTeam()
 		int targetTeam = target.GetTeam()
-		if( playerTeam != targetTeam && !IsFFAGame() )
+		if( playerTeam != targetTeam && !IsFFAGame() && spectator_namecards > 0 )
 		{
 			SetTeam( player, targetTeam )
 		}
@@ -243,7 +250,7 @@ void function SetSpectatorCamera( entity player, entity target )
 		player.SetViewEntity( player.GetObserverTarget(), true )
 
 		LogString( "[SPECTATOR MOD] SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) on player: " + player )
-		if( !IsFFAGame() )
+		if( !IsFFAGame()  && spectator_namecards > 0)
 		{
 			player.StartObserverMode( OBS_MODE_IN_EYE )
 			LogString( "[SPECTATOR MOD] StartObserverMode( OBS_MODE_IN_EYE ) on player: " + player )
