@@ -8,6 +8,7 @@ untyped
 global function CustomSpectator_Init
 global float spectatorPressedDebounceTime = 0.4
 int spectator_namecards
+array<string> spectator_admins
 
 struct
 {
@@ -26,6 +27,7 @@ enum spectateCycle
 void function CustomSpectator_Init()
 {
 	spectator_namecards = GetConVarInt( "spectator_namecards" )
+	spectator_admins = split( GetConVarString( "spectator_admins" ), "," )
 
 	LogString( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
 	thread SpectatorChatMessageThread()
@@ -139,6 +141,8 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 
 bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 {
+	if( spectator_admins.len() > 0 && !spectator_admins.contains( player.GetUID() ) )
+		return false
 	//cleanup stuff so we dont accidentally call cycle later
 	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
 	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )

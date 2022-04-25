@@ -18,7 +18,8 @@ Please not that this is absolutely not stable, if you experience crashes do not 
 - 0.2.11 Fix crash when people reconnect fast or somehow get disconnected twice in a row (no clue when that happens?).
 - 0.2.12 Only start spectating/switch team if kill cam is over. This will reduce many unnecessary team swaps that mess up spawns, etc.
 - 0.2.13 fix a crash inside SpectateCamera() because a player entity was not valid (around line 212).
-- 0.2.13 added spectator_namecards ConVar which allows enabling/disabling name cards, which need team switches to be displayed correctly.
+- 0.2.13 added `spectator_namecards` ConVar which allows enabling/disabling name cards, which need team switches to be displayed correctly.
+- 0.2.13 added `spectator_admins` ConVar so you can restrict spectator to certain players/UIDs.
 ## Known issues
 - When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names.
@@ -61,3 +62,10 @@ Description: Enable or disable logging for this mod.
 Accepted values: `0`, `1`  
 Default: `1`  
 Description: Enable or disable namecards. Namecards need switching to the enemy team to be working correctly. Set this to 0 if you have issues with team switching/spawns.
+
+`spectator_admins`  
+Accepted values: "UID,UID" or "" (empty string)
+Example 1: "12331232"  
+Example 2: "2512342421,21315122,521452152"  
+Default: ""  
+Description: If you add UIDs in this string, spectator will only be available for these users. If the string is empty it will allow everybody to spectate.

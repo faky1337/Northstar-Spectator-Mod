@@ -38,6 +38,10 @@
 		{
 			"Name": "spectator_namecards",
 			"DefaultValue": "1"
+		},
+		{
+			"Name": "spectator_admins",
+			"DefaultValue": ""
 		}
 	]
 }
