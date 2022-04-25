@@ -61,7 +61,7 @@ Description: Enable or disable logging for this mod.
 `spectator_namecards`  
 Accepted values: `0`, `1`  
 Default: `1`  
-Description: Enable or disable namecards. Namecards need switching to the enemy team to be working correctly. Set this to 0 if you have issues with team switching/spawns.
+Description: Enable or disable namecards. Namecards need switching to the enemy team to be working correctly. Set this to 0 if you have issues with team switching/spawns. No effect if you use FFA gamemodes (always disabled in FFA).
 
 `spectator_admins`  
 Accepted values: "UID,UID" or "" (empty string)

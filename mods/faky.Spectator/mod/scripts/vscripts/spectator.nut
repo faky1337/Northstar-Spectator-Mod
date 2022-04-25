@@ -2,8 +2,6 @@
 //TODO: make player not switch team to spec enemy
 //TODO: ?make player not use slot when spectating?
 //TODO: ?add some error handling to avoid server crashes?
-//TODO: Only allow allowed to spec option set by CVAR
-//TODO: 
 untyped
 global function CustomSpectator_Init
 global float spectatorPressedDebounceTime = 0.4
