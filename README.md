@@ -64,8 +64,8 @@ Default: `1`
 Description: Enable or disable namecards. Namecards need switching to the enemy team to be working correctly. Set this to 0 if you have issues with team switching/spawns. No effect if you use FFA gamemodes (always disabled in FFA).
 
 `spectator_admins`  
-Accepted values: "UID,UID" or "" (empty string)
-Example 1: "12331232"  
-Example 2: "2512342421,21315122,521452152"  
-Default: ""  
+Accepted values: `"UID,UID"` or `""` (empty string)  
+Example 1: `"12331232"`  
+Example 2:  `"2512342421,21315122,521452152"`   
+Default: `""`  
 Description: If you add UIDs in this string, spectator will only be available for these users. If the string is empty it will allow everybody to spectate.
