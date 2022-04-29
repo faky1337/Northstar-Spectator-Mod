@@ -208,10 +208,16 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 	file.lastSpectated[ player ] <- target
 
 	WaitFrame() // wait for the frame otherwise IsWatchingKillReplay() is not true most of the time
+
+	if( !IsValidPlayer( player ) || !IsValidPlayer( target ))
+		return
+
 	if( player.IsWatchingKillReplay() )
 	{
 		player.WaitSignal( "KillCamOver" ) // wait until killcam is over
 		WaitFrame() // wait for frame because EndSignal OnRespawned might be a bit late or so?
+		if( !IsValidPlayer( player ) || !IsValidPlayer( target ))
+			return
 	}
 
 	if( !IsValidPlayer( player ) || !IsValidPlayer( target ) ) // check if players are valid or we might crash later using invalid players
