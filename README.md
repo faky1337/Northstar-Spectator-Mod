@@ -1,7 +1,7 @@
 # Spectator Mod
 Server side mod that allows every player to spectate everyone.  
 You can call the `spec` function with a string argument to spectate someone specific.  
-Please not that this is absolutely not stable, if you experience crashes do not hesitate to send me your log on Discord faky#2514.
+Please note that this is absolutely not stable, if you experience crashes do not hesitate to send me your log on Discord faky#2514.
 
 ## Changes
 - Add function "Automatically spectate your killer after death cam has ended" and related ConVar(int) `spectator_afterdeathcam`.
@@ -20,6 +20,9 @@ Please not that this is absolutely not stable, if you experience crashes do not 
 - 0.2.13 fix a crash inside SpectateCamera() because a player entity was not valid (around line 212).
 - 0.2.13 added `spectator_namecards` ConVar which allows enabling/disabling name cards, which need team switches to be displayed correctly.
 - 0.2.13 added `spectator_admins` ConVar so you can restrict spectator to certain players/UIDs.
+- 0.2.14 fixed crash in SpectateCamera() when player entity became invalid just after waiting 1 frame.
+- 0.2.14 end some threads when player disconnects.
+- 0.2.14 add some try/catch so server does not crash when here is an error.
 ## Known issues
 - When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names.
