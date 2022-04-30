@@ -1,7 +1,7 @@
 # Spectator Mod
 Server side mod that allows every player to spectate everyone.  
 You can call the `spec` function with a string argument to spectate someone specific.  
-Please note that this is absolutely not stable, if you experience crashes do not hesitate to send me your log on Discord faky#2514.
+Please note that this is absolutely not stable (0.2.14 might be significantly more stable tho!), if you experience crashes do not hesitate to send me your log on Discord faky#2514.
 
 ## Changes
 - Add function "Automatically spectate your killer after death cam has ended" and related ConVar(int) `spectator_afterdeathcam`.
