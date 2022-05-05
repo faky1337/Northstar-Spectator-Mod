@@ -43,12 +43,15 @@ void function CustomSpectator_Init()
 void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan spawn camera works with this mod
 {
 	player.EndSignal( "Disconnected" )
+
 	try
 	{
 		string playerName = player.GetPlayerName()
 		LogString( "[SPECTATOR MOD] Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
 
 		player.WaitSignal( "RespawnMe" )
+		RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime ) // try to fix respawnastitan bug
+		RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime ) // try to fix respawnastitan bug
 
 		//this just seems works if you use it before/just right after signal "RespawnMe"!
 		player.StopObserverMode()
@@ -237,8 +240,6 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 	{
 		LogString( "[SPECTATOR MOD] Called SpectateCamera() player: " + player + " target: " + target)
 		// if player started spawning as titan or player wants to watch himself
-		if( player.isSpawning || player == target )
-			return
 
 		file.lastSpectated[ player ] <- target
 
@@ -257,7 +258,8 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 
 		if( !IsValidPlayer( player ) || !IsValidPlayer( target ) ) // check if players are valid or we might crash later using invalid players
 			return
-
+		if( player.isSpawning )
+			return
 		LogString( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
 		Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false )
 		if( IsAlive( player ) )
@@ -272,12 +274,8 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 				SetTeam( player, targetTeam )
 			}
 
-			//If player started spawning as titan
-			if( player.isSpawning )
-				return
-
 			SetSpectatorCamera( player, target )
-			ThreadSpectatorCameraDeathcamFix( player, target )
+			thread ThreadSpectatorCameraDeathcamFix( player, target )
 		}
 	}
 	catch( ex )

@@ -22,16 +22,17 @@ Please note that this is absolutely not stable (0.2.14 might be significantly mo
 - 0.2.13 added `spectator_admins` ConVar so you can restrict spectator to certain players/UIDs.
 - 0.2.14 fixed crash in SpectateCamera() when player entity became invalid just after waiting 1 frame.
 - 0.2.14 end some threads when player disconnects.
-- 0.2.14 add some try/catch so server does not crash when here is an error.
+- 0.2.14 add some try/catch so server does not crash when there is an error.
+- 0.2.15 fix issue immediately going to spec if spawned as titan somtimes.
 ## Known issues
-- When you spectate an enemy but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
-- FFA gamemodes will not show names.
-- If you go OOB, immediately spec, immediately spawn in as titan => you will get killed (by OOB timer?)
+- When you spectate an enemy (and get switched to the other team because namecards) but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
+- FFA gamemodes will not show names (since team switching would be needed).
+- ~~If you go OOB, immediately spec, immediately spawn in as titan => you will get killed (by OOB timer?)~~
 - When a new player joins and you are spectating the enemy team: Teams will get unbalanced
-- When a player is having a timeout and rejoins before the server knows, that the client is having a timeout => crash
-- To spectate enemies we need to switch to the enemy team until I figure out how it works without switching :)
+- ~~When a player is having a timeout and rejoins before the server knows, that the client is having a timeout => crash~~
+- To spectate enemies (with namecards) we need to switch to the enemy team until I figure out how it works without switching :)
 ## Usage
-Type `spec` into console. Use A/D (LEFT/RIGHT) to switch between players.
+Type `spec` into console. Use A/D (LEFT/RIGHT) to switch between players.  
 Type `spec pla` to spec a player whose name has `pla` in his name (would for example spectate on "player" now).
 ## ConVars for chat announcements
 You can use following ConVars to edit the config on the run or add them to your `autoexec_ns_server.cfg` to set them on server start.
@@ -69,6 +70,6 @@ Description: Enable or disable namecards. Namecards need switching to the enemy 
 `spectator_admins`  
 Accepted values: `"UID,UID"` or `""` (empty string)  
 Example 1: `"12331232"`  
-Example 2:  `"2512342421,21315122,521452152"`   
+Example 2: `"2512342421,21315122,521452152"`   
 Default: `""`  
 Description: If you add UIDs in this string, spectator will only be available for these users. If the string is empty it will allow everybody to spectate.
