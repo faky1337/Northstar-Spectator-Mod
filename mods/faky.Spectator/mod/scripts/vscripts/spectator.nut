@@ -28,7 +28,7 @@ void function CustomSpectator_Init()
 	spectator_namecards = GetConVarInt( "spectator_namecards" )
 	spectator_admins = split( GetConVarString( "spectator_admins" ), "," )
 
-	LogString( "[SPECTATOR MOD] starting thread for spectator chatinfo broadcast" )
+	LogString( "starting thread for spectator chatinfo broadcast" )
 	thread SpectatorChatMessageThread()
 
 	AddClientCommandCallback( "spec", ClientCommandCallbackSpectate )
@@ -49,9 +49,11 @@ void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan
 	try
 	{
 		string playerName = player.GetPlayerName()
-		LogString( "[SPECTATOR MOD] Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
+		LogString( "Started ThreadWaitPlayerRespawnStarted for " + player.GetPlayerName() )
 
 		player.WaitSignal( "RespawnMe" )
+		LogString( "After wait for Signal RespawnMe in ThreadWaitPlayerRespawnStarted()" )
+		LogString( "Removing PressedCallback" )
 		RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime ) // try to fix respawnastitan bug
 		RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime ) // try to fix respawnastitan bug
 
@@ -59,18 +61,18 @@ void function ThreadWaitPlayerRespawnStarted( entity player ) // needed so titan
 		player.StopObserverMode()
 		player.SetSpecReplayDelay( 0.0 )
 
-		LogString( "[SPECTATOR MOD] Ended ThreadWaitPlayerRespawnStarted for " + playerName )
+		LogString( "Ended ThreadWaitPlayerRespawnStarted for " + playerName )
 	}
 	catch( ex )
 	{
-		LogString( "[SPECTATOR MOD] [ERROR]: " + ex )
+		LogString( "[ERROR]: " + ex )
 	}
 }
 
 void function OnClientConnected( entity player )
 {
 	file.spectateTargets.append( player )
-	LogString( "[SPECTATOR MOD] added " + player.GetPlayerName() + " to spectateTargets." )
+	LogString( "added " + player.GetPlayerName() + " to spectateTargets." )
 }
 
 void function OnClientDisconnected( entity player )
@@ -81,11 +83,11 @@ void function OnClientDisconnected( entity player )
 	if( i >= 0 && i < file.spectateTargets.len() ) //check since int i might be null or something that might crash?
 	{
 		file.spectateTargets.remove( i )
-		LogString( "[SPECTATOR MOD] removed " + player.GetPlayerName() + " from spectateTargets." )
+		LogString( "removed " + player.GetPlayerName() + " from spectateTargets." )
 	}
 	else
 	{
-		LogString( "[SPECTATOR MOD] Tried to remove a player from the file.spectateTargets array, but there was an error finding the player in the array" )
+		LogString( "Tried to remove a player from the file.spectateTargets array, but there was an error finding the player in the array" )
 	}
 }
 
@@ -93,6 +95,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
 	try
 	{
+		delete file.playerRespawnTime[ victim ]
 		thread ThreadWaitPlayerRespawnStarted( victim ) // titan spawn camera workaround
 		int victimTeam = victim.GetTeam()
 		file.lastTeam[ victim ] <- victimTeam
@@ -102,7 +105,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	}
 	catch( ex )
 	{
-		LogString( "[SPECTATOR MOD] [ERROR]: " + ex )
+		LogString( "[ERROR]: " + ex )
 	}
 }
 
@@ -114,17 +117,22 @@ void function ThreadWaitDeathcam( entity player )
 	{
 		float deathcamLength = GetDeathCamLength( player )
 		wait deathcamLength
+		LogString( "After wait for deathcamLength (float)." )
 		player.Signal( "DeathcamOver" )
 	}
 	catch( ex )
 	{
-		LogString( "[SPECTATOR MOD] [ERROR]: " + ex )
+		LogString( "[ERROR]: " + ex )
 	}
 }
 
 void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPlayerRespawned
 {
-	file.playerRespawnTime[ victim ] <- Time()
+	LogString( "Removing PressedCallback" )
+	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
+	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
+
+	file.playerRespawnTime[ player ] <- Time()
 	if ( player in file.lastTeam && !IsFFAGame() && spectator_namecards > 0 )
 	{
 		SetTeam( player, file.lastTeam[ player ])
@@ -133,9 +141,6 @@ void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPl
 
 	if ( player in file.lastSpectated )
 		delete file.lastSpectated[ player ]
-
-	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
-	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 }
 
 void function OnPlayerKilledThread( entity victim, entity attacker )
@@ -148,9 +153,9 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 
 	try
 	{
-		LogString( "[SPECTATOR MOD] OnPlayerKilledThread() started. Victim: " + victim + " Attacker: " + attacker )
+		LogString( "OnPlayerKilledThread() started. Victim: " + victim + " Attacker: " + attacker )
 		float deathCamlength = GetDeathCamLength( victim )
-		LogString( "[SPECTATOR MOD] Deathcam length is: " + deathCamlength )
+		LogString( "Deathcam length is: " + deathCamlength )
 		array<string> args
 
 		if( IsValidPlayer( attacker ) ) // make sure it's a player because victim could be killed by world/oob/..?
@@ -166,17 +171,21 @@ void function OnPlayerKilledThread( entity victim, entity attacker )
 		if( !IsAlive( victim ) && IsValidPlayer( victim ) )
 		{
 			ClientCommandCallbackSpectate( victim, args )
-			LogString( "[SPECTATOR MOD] Called ClientCommandCallbackSpectate() from OnPlayerKilledThread(). Victim: " + victim )
+			LogString( "Called ClientCommandCallbackSpectate() from OnPlayerKilledThread(). Victim: " + victim )
 		}
 	}
 	catch( ex )
 	{
-		LogString( "[SPECTATOR MOD] [ERROR]: " + ex )
+		LogString( "[ERROR]: " + ex )
 	}
 }
 
 bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 {
+	LogString( "Removing PressedCallback" )
+	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
+	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
+
 	if( spectator_admins.len() > 0 && !spectator_admins.contains( player.GetUID() ) )
 		return false
 	//cleanup stuff so we dont accidentally call cycle later
@@ -197,22 +206,19 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 					target = playerfromarray
 					if( ( player == target ) )
 					{
-						LogString( "[SPECTATOR MOD] Spectating yourself is disabled" )
-						Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating yourself is disabled", true )
+						LogString( "Spectating yourself is disabled" )
+						Chat_ServerPrivateMessage( player, "Spectating yourself is disabled", true )
 						return true
 					}
 				}
 			}
 		}
 
-		AddPlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
-		AddPlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
-
 		// if we did not find a target before even user specified string in args
 		if( target == player && args.len() > 0 )
 		{
-			LogString( "[SPECTATOR MOD] Did not find specified player." )
-			Chat_ServerPrivateMessage (player, "[SPECTATOR MOD] Did not find specified player.", true )
+			LogString( "Did not find specified player." )
+			Chat_ServerPrivateMessage (player, "Did not find specified player.", true )
 			return true
 		}
 
@@ -223,8 +229,8 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 	}
 	else
 	{
-		LogString( "[SPECTATOR MOD] Spactator is only available in Playing gamestate")
-		Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spactator is only available in Playing gamestate", false )
+		LogString( "Spactator is only available in Playing gamestate")
+		Chat_ServerPrivateMessage( player, "Spactator is only available in Playing gamestate", false )
 	}
 
 	return true
@@ -233,14 +239,18 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 //TODO: Rename functions
 void function SpectateCamera( entity player, entity target ) //TODO: Rename this to SpectatorCameraSetup
 {
+	LogString( "Removing PressedCallback in SpectateCamera () before EndSignals block" )
+	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
+	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 	player.EndSignal( "PlayerRespawnStarted" )
 	player.EndSignal( "OnRespawned" )
 	player.EndSignal( "Disconnected" )
 
 	try
 	{
-		LogString( "[SPECTATOR MOD] Called SpectateCamera() player: " + player + " target: " + target)
-		//LogString( "[SPECTATOR MOD] Deathcam length: " + GetDeathCamLength( player ) )
+		LogString( "Called SpectateCamera() player: " + player + " target: " + target)
+		//LogString( "Deathcam length: " + GetDeathCamLength( player ) )
+		LogString( "Removing PressedCallback" )
 		RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
 		RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 
@@ -263,12 +273,11 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 			return
 		if( player.isSpawning )
 			return
-		LogString( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
-		Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false )
+		LogString( "Player: " + player + " Target: " + target )
 		if( IsAlive( player ) && ( Time() - file.playerRespawnTime[ player ]  ) > 2.0 )
 			player.Die()
 
-		if( IsAlive( target ) )
+		if( IsAlive( target ) && !IsAlive( player ))
 		{
 			int playerTeam = player.GetTeam()
 			int targetTeam = target.GetTeam()
@@ -276,15 +285,17 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 			{
 				SetTeam( player, targetTeam )
 			}
+			LogString( "Adding PressedCallback in SpectateCamera()" )
 			AddPlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
 			AddPlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
+			Chat_ServerPrivateMessage( player, "Spectating: " + target.GetPlayerName(), false )
 			SetSpectatorCamera( player, target )
 			thread ThreadSpectatorCameraDeathcamFix( player, target )
 		}
 	}
 	catch( ex )
 	{
-		LogString( "[SPECTATOR MOD] [ERROR]: " + ex )
+		LogString( "[ERROR]: " + ex )
 	}
 }
 
@@ -301,23 +312,23 @@ void function SetSpectatorCamera( entity player, entity target )
 			player.SetObserverTarget( target )
 			player.SetViewEntity( player.GetObserverTarget(), true )
 
-			LogString( "[SPECTATOR MOD] SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) on player: " + player )
+			LogString( "SetSpecReplayDelay( FIRST_PERSON_SPECTATOR_DELAY ) on player: " + player )
 			if( !IsFFAGame()  && spectator_namecards > 0)
 			{
 				player.StartObserverMode( OBS_MODE_IN_EYE )
-				LogString( "[SPECTATOR MOD] StartObserverMode( OBS_MODE_IN_EYE ) on player: " + player )
+				LogString( "StartObserverMode( OBS_MODE_IN_EYE ) on player: " + player )
 			}
 		}
 	}
 	catch( ex )
 	{
-		LogString( "[SPECTATOR MOD] [ERROR]:" + ex )
+		LogString( "[ERROR]:" + ex )
 	}
 }
 
 void function ThreadSpectatorCameraDeathcamFix( entity player, entity target )
 {
-	LogString( "[SPECTATOR MOD] ThreadSpectatorCameraDeathcamFix() player: " + player + " target: " + target )
+	LogString( "ThreadSpectatorCameraDeathcamFix() player: " + player + " target: " + target )
 	player.EndSignal( "PlayerRespawnStarted" )
 	player.EndSignal( "OnRespawned" )
 	player.EndSignal( "SpectatorCycle" ) // sometimes if you cycle too fast the fix will crash the server!
@@ -328,6 +339,7 @@ void function ThreadSpectatorCameraDeathcamFix( entity player, entity target )
 		// when calling the spec callback the player dies and resets to intermission camera after deathcam. just set the camera to once again.
 		//float deathcamLength = GetDeathCamLength( player )
 		player.WaitSignal( "DeathcamOver" )
+		LogString("after Wait for Signal DeathcamOver signal int ThreadSpectatorCameraDeathcamFix()")
 		if( !IsValidPlayer ( player ) )
 			return
 		if ( player.IsWatchingKillReplay() )
@@ -336,7 +348,7 @@ void function ThreadSpectatorCameraDeathcamFix( entity player, entity target )
 	}
 	catch( ex )
 	{
-		LogString( "[SPECTATOR MOD] [ERROR]:" + ex )
+		LogString( "[ERROR]:" + ex )
 	}
 }
 
@@ -432,5 +444,5 @@ void function SpectatorChatMessageThread()
 void function LogString( string logstring )
 {
 	if( GetConVarInt( "spectator_log" ) == 1 )
-		print( logstring )
+		print( "[SPECTATOR MOD] [" + Time() + "] " + logstring )
 }
