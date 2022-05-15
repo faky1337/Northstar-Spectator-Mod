@@ -1,6 +1,7 @@
 //TODO: make player not switch team to spec enemy. HOW? (only without namecards obs_mode_in_eye, also when spectating cant send player chat messages / hud messages from server :|)
 //TODO: make player not use slot when spectating. Is that even possible?
 //TODO: make logging actually good. :|
+//TODO: actually make us of OnThreadEnd()
 untyped
 global function CustomSpectator_Init
 float spectatorPressedDebounceTime = 0.4
@@ -12,6 +13,7 @@ struct
 	table<entity, entity> lastSpectated = {}
 	table<entity, int> lastTeam = {}
 	array<entity> spectateTargets = []
+	table<entity, float> playerRespawnTime = {}
 } file
 
 enum spectateCycle
@@ -122,6 +124,7 @@ void function ThreadWaitDeathcam( entity player )
 
 void function SpectatorRemoveCycle( entity player ) // should be renamed to OnPlayerRespawned
 {
+	file.playerRespawnTime[ victim ] <- Time()
 	if ( player in file.lastTeam && !IsFFAGame() && spectator_namecards > 0 )
 	{
 		SetTeam( player, file.lastTeam[ player ])
@@ -177,8 +180,6 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 	if( spectator_admins.len() > 0 && !spectator_admins.contains( player.GetUID() ) )
 		return false
 	//cleanup stuff so we dont accidentally call cycle later
-	RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
-	RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 
 	if( GetGameState() == eGameState.Playing )
 	{
@@ -215,8 +216,8 @@ bool function ClientCommandCallbackSpectate(entity player, array<string> args)
 			return true
 		}
 
-		if( IsAlive( player ) )
-			player.Die()
+		//if( IsAlive( player ) )
+			//player.Die()
 
 		thread SpectateCamera( player, target )
 	}
@@ -239,7 +240,9 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 	try
 	{
 		LogString( "[SPECTATOR MOD] Called SpectateCamera() player: " + player + " target: " + target)
-		// if player started spawning as titan or player wants to watch himself
+		//LogString( "[SPECTATOR MOD] Deathcam length: " + GetDeathCamLength( player ) )
+		RemovePlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
+		RemovePlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 
 		file.lastSpectated[ player ] <- target
 
@@ -262,7 +265,7 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 			return
 		LogString( "[SPECTATOR MOD] Player: " + player + " Target: " + target )
 		Chat_ServerPrivateMessage( player, "[SPECTATOR MOD] Spectating: " + target.GetPlayerName(), false )
-		if( IsAlive( player ) )
+		if( IsAlive( player ) && ( Time() - file.playerRespawnTime[ player ]  ) > 2.0 )
 			player.Die()
 
 		if( IsAlive( target ) )
@@ -273,7 +276,8 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 			{
 				SetTeam( player, targetTeam )
 			}
-
+			AddPlayerPressedLeftCallback( player, SpectatorCyclePrevious, spectatorPressedDebounceTime )
+			AddPlayerPressedRightCallback( player, SpectatorCycleNext, spectatorPressedDebounceTime )
 			SetSpectatorCamera( player, target )
 			thread ThreadSpectatorCameraDeathcamFix( player, target )
 		}
