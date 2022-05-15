@@ -24,6 +24,8 @@ Please note that this is absolutely not stable (0.2.14 might be significantly mo
 - 0.2.14 end some threads when player disconnects.
 - 0.2.14 add some try/catch so server does not crash when there is an error.
 - 0.2.15 fix issue immediately going to spec if spawned as titan somtimes.
+- 0.2.16 add more logs / add timestamp to logs
+- 0.2.16 fix issue pilot getting killed and again spectating after respawn
 ## Known issues
 - When you spectate an enemy (and get switched to the other team because namecards) but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names (since team switching would be needed).
