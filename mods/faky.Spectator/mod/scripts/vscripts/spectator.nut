@@ -380,7 +380,6 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 
 	int spectateTargetsCount = file.spectateTargets.len()
 	int loops = 0
-	int teamonly = GetConVarInt( "spectator_teamonly" )
 
 	while( foundNoTarget )
 		{
