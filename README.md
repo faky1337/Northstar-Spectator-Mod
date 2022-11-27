@@ -26,6 +26,7 @@ Please note that this is absolutely not stable (0.2.14 might be significantly mo
 - 0.2.15 fix issue immediately going to spec if spawned as titan somtimes.
 - 0.2.16 add more logs / add timestamp to logs
 - 0.2.16 fix issue pilot getting killed and again spectating after respawn
+- 0.2.17 add teamonly convar and check. If set to 1 it will only allow to spectate your teammates.
 ## Known issues
 - When you spectate an enemy (and get switched to the other team because namecards) but your auto titan is alive (probably also turrets and other things) and kills someone, the enemy team will get rewarded.
 - FFA gamemodes will not show names (since team switching would be needed).
@@ -75,3 +76,8 @@ Example 1: `"12331232"`
 Example 2: `"2512342421,21315122,521452152"`   
 Default: `""`  
 Description: If you add UIDs in this string, spectator will only be available for these users. If the string is empty it will allow everybody to spectate.
+
+`spectator_teamonly`  
+Accepted values: 0, 1  
+Default: 0  
+Description: If set to 1 it only allows to spectate teammates.
