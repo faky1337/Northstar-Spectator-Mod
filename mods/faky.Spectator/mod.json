@@ -42,6 +42,10 @@
 		{
 			"Name": "spectator_admins",
 			"DefaultValue": ""
+		},
+		{
+			"Name": "spectator_teamonly",
+			"DefaultValue": "0"
 		}
 	]
 }

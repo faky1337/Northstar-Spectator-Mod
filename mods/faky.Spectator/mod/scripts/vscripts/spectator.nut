@@ -260,6 +260,8 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 
 		if( !IsValidPlayer( player ) || !IsValidPlayer( target ))
 			return
+		if( GetConVarInt( "spectator_teamonly" ) == 1 && target.GetTeam() != player.GetTeam() )
+			return
 
 		if( player.IsWatchingKillReplay() )
 		{
@@ -277,7 +279,7 @@ void function SpectateCamera( entity player, entity target ) //TODO: Rename this
 		if( IsAlive( player ) && ( Time() - file.playerRespawnTime[ player ]  ) > 2.0 )
 			player.Die()
 
-		if( IsAlive( target ) && !IsAlive( player ))
+		if( IsAlive( target ) && !IsAlive( player ) )
 		{
 			int playerTeam = player.GetTeam()
 			int targetTeam = target.GetTeam()
@@ -378,6 +380,8 @@ entity function SpectatorFindTarget( entity player, int cycleDirection )
 
 	int spectateTargetsCount = file.spectateTargets.len()
 	int loops = 0
+	int teamonly = GetConVarInt( "spectator_teamonly" )
+
 	while( foundNoTarget )
 		{
 			// if end or start of array was reached
